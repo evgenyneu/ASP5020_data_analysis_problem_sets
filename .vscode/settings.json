@@ -1,0 +1,10 @@
+{
+  "python.linting.enabled": true,
+  "python.linting.pylintEnabled": false,
+  "terminal.integrated.inheritEnv": true,
+  "[python]": {
+    "editor.tabSize": 4
+},
+"python.linting.flake8Enabled": true,
+"python.pythonPath": "/Users/evgenii/opt/miniconda3/envs/uni_2021_data_analysis_problem_sets/bin/python",
+}
