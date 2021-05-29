@@ -17,7 +17,7 @@ def set_plot_style():
     plt.rcParams['axes.titlesize'] = LARGE_SIZE
 
     # Axes label size
-    plt.rcParams['axes.labelsize'] = NORMAL_SIZE
+    plt.rcParams['axes.labelsize'] = LARGE_SIZE
 
     # Tick label size
     plt.rcParams['xtick.labelsize'] = TINY_SIZE
@@ -38,10 +38,10 @@ def set_plot_style():
     plt.rcParams['grid.color'] = '#cccccc'
 
     # Define plot size
-    plt.rcParams['figure.figsize'] = [12, 8]
+    plt.rcParams['figure.figsize'] = [9, 6]
 
     # Marker size
-    plt.rcParams['lines.markersize'] = 25
+    plt.rcParams['lines.markersize'] = 20
 
 
 def plot_type(ax, df, type, marker, facecolor, edgecolor):
@@ -98,13 +98,12 @@ def plot_data(path_to_data):
     ax.set_xlabel(r'$x_1$')
     ax.grid(zorder=1)
     ax.set_ylabel(r'$x_2$')
-    ax.set_title('Two types of observations')
     fig.tight_layout()
-    save_plot(plt)
+    save_plot(fig)
 
 
 if __name__ == "__main__":
     set_plot_style()
-    plot_data('ps5_data.csv')
+    plot_data('data/ps5_data.csv')
 
     print('We are done')

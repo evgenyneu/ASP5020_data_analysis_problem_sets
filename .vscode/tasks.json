@@ -16,7 +16,7 @@
         {
           "label": "Run LaTeX",
           "type": "shell",
-          "command": "/Library/TeX/texbin/pdflatex '${relativeFile}' && open -a Skim.app ${fileBasename}.pdf",
+          "command": "cd ps5/report && /Library/TeX/texbin/pdflatex assignment.tex && open -a Skim.app assignment.pdf",
           "problemMatcher": [],
         },
         {

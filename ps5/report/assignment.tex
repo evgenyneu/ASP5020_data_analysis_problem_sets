@@ -1,4 +1,4 @@
-\documentclass[a4paper,twoside,12pt,hidelinks]{extarticle}
+\documentclass[a4paper,twoside,14pt,hidelinks]{extarticle}
 
 
 % Packages
@@ -15,44 +15,18 @@
 \usepackage{bm} % Make math bold with $\bm{some math}$
 \usepackage{enumitem} % Customizable lists https://tex.stackexchange.com/a/42907/101976
 
-% Precent figures from being placed too far from the text with
-% \begin{figure}[H]
-% https://tex.stackexchange.com/a/8633/101976
-\usepackage{float}
-
-% Force footnotes to appear at the very bottom of the page
-% https://stackoverflow.com/a/3527521/297131
-\usepackage[bottom]{footmisc}
-
-% Make URLs smaller
-% https://tex.stackexchange.com/a/109750/101976
-\usepackage{relsize}
-\renewcommand*{\UrlFont}{\ttfamily\smaller\relax}
-
-% Physical numbers and units
-\usepackage[separate-uncertainty = true, multi-part-units=single]{siunitx}
-
-% Adjust space before and after section and subsection with titlespacing
-\usepackage{titlesec}
-
-% Add space between table and its caption
-\usepackage{caption}
-
 
 % Typography
 % ---------------------
 
 % Page margins
-\usepackage[top=2.5cm, bottom=2.5cm, left=2.5cm, right=2.5cm]{geometry}
+\usepackage[top=2cm, bottom=2.5cm, left=2.5cm, right=2.5cm]{geometry}
 
 % First line indentation
 \setlength{\parindent}{2em}
 
 % Line spacing
 \renewcommand{\baselinestretch}{1.1}
-
-% Hanging indentation in reference list
-\setlength\bibhang{2em}
 
 % Color the links and references
 \hypersetup{
@@ -65,48 +39,39 @@
 %          plus 4pt means that TeX can stretch it by at most 4pt
 %          minus 2pt means that TeX can shrink it by at most 2pt
 % https://tex.stackexchange.com/a/53341
+\usepackage{titlesec}
 \titlespacing*{\section}{0pt}{4em plus 2em minus 2em}{2em plus 1em minus 1em}
 \titlespacing*{\subsection}{0pt}{2em plus 1em minus 1em}{1em plus .5em minus .5em}
 
-% Decrease the distance between a figure and its label
-% https://tex.stackexchange.com/a/45996/101976
-\setlength{\abovecaptionskip}{5pt plus 3pt minus 3pt}
-
-% Prevent stretching content vertically and adding empty space
+% Precent stretching content vertically and adding empty space
 \raggedbottom
 
-% only chapters and above in ToC
-\setcounter{tocdepth}{2}
+% Remove numbers from sections
+\setcounter{secnumdepth}{0}
 
-% Left-align left with paragraph (enumitem package)
-\setlist{leftmargin=\parindent}
+% Set margins for the contents
+\dottedcontents{part}[0em]{\bfseries}{0em}{1pc} % Use dots in the table of contents
+\dottedcontents{section}[2em]{\bfseries}{2em}{1pc} % Use dots in the table of contents
+\dottedcontents{subsection}[3em]{}{2em}{1pc} % Use dots in the table of contents
 
-% Space between the text body and the footnotes:
-% https://stackoverflow.com/a/783751/297131
-\setlength{\skip\footins}{0.7cm}
-
-% Approximatelly proportional symbol
-% https://tex.stackexchange.com/a/33547/101976
-\newcommand{\appropto}{\mathrel{\vcenter{
-  \offinterlineskip\halign{\hfil$##$\cr
-    \propto\cr\noalign{\kern2pt}\sim\cr\noalign{\kern-2pt}}}}}
+% Set distance between figure and its caption
+% https://tex.stackexchange.com/a/94018
+\usepackage{caption}
+\captionsetup[figure]{skip=0pt}
 
 % Title page
 % ----------
 
-\title{\large Literature Review \\\vspace{0.5cm}\Large Science and numerology of stellar convection modelling}
-\author{Evgenii Neumerzhitckii\\Student ID: 27889076\vspace{0.3cm}\\Supervised by Simon Campbell}
-\date{May 14, 2021}
+\title{\normalsize ASP5020: Data analysis and machine learning \\\vspace{0.5cm}\Large Problem Set 5}
+\author{\normalsize Evgenii Neumerzhitckii\\\normalsize Student ID: 27889076\vspace{0.3cm}}
+\date{\normalsize Due: May 28, 2021\\\normalsize Submitted: May 29, 2021}
 
 \begin{document}
 
 \maketitle
 \thispagestyle{empty} % Remove page number from title page
 
-\input{parts/000_abstract}
-\pagebreak
-
-\vspace{3.5cm} % Add space between the title and table of contents
+\vspace{0.5cm} % Add space between the title and table of contents
 \tableofcontents
 \thispagestyle{empty} % Remove page number from title page
 \pagebreak
@@ -117,7 +82,7 @@
 
 \pagestyle{fancy}
 \fancyhf{}
-\fancyhead[C]{Simulations of stellar convection}
+\fancyhead[C]{Problem set 5}
 \fancyhead[LE,RO]{\thepage}
 
 

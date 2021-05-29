@@ -5,7 +5,7 @@ import inspect
 import numpy as np
 
 
-def save_plot(plt, suffix=None, extensions=['png'], subdir='plots', dpi=300,
+def save_plot(plt, suffix=None, extensions=['pdf'], subdir='plots', dpi=300,
               silent=False):
     """
     Saves a plot to an image file. The name of the
