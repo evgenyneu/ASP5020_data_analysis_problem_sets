@@ -1,7 +1,10 @@
 import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib.ticker import MaxNLocator
-from plot_utils import save_plot, set_plot_style
+
+from plot_utils import save_plot, set_plot_style, \
+    MARKER_FACE_COLOR, MARKER_EDGE_COLOR, MARKER_EDGE_WIDTH, \
+    MARKER_SIZE, LINE_COLOR
 
 set_plot_style()
 
@@ -80,7 +83,7 @@ hidden_layer_weights = np.array([
 ])
 
 hidden_layer_sums = hidden_layer_inputs @ hidden_layer_weights
-hidden_layer_outputs = hidden_layer_sums # <-- Removed sigmoid (Evgenii)
+hidden_layer_outputs = sigmoid(hidden_layer_sums)
 
 # Output layer.
 output_layer_inputs = np.hstack([
@@ -93,7 +96,7 @@ output_layer_weights = np.array([
 ]).T
 
 output_layer_sums = output_layer_inputs @ output_layer_weights
-output_layer_outputs = sigmoid(output_layer_sums)
+output_layer_outputs = output_layer_sums  # <----- Removed sigmoid
 
 # Calculate our loss function: the total error in our predictions
 # compared to the target.
@@ -134,7 +137,7 @@ for epoch in range(num_epochs):
 
 
     alpha_o = output_layer_inputs @ output_layer_weights
-    beta_o = alpha_o # <-- Removed sigmoid (Evgenii)
+    beta_o = alpha_o  # <----- Removed sigmoid
 
     y_pred = beta_o
 
@@ -147,7 +150,7 @@ for epoch in range(num_epochs):
     losses[epoch] = loss
 
     # Calculate gradients.
-    s = (beta_o - y) # <-- Removed derivative of sigmoid (Evgenii)
+    s = (beta_o - y)  # <----- Removed derivative of sigmoid
     dE_dw21 = s * beta_h[:, [4]]
     dE_dw20 = s * beta_h[:, [3]]
     dE_dw19 = s * beta_h[:, [2]]
@@ -197,45 +200,56 @@ for epoch in range(num_epochs):
 # Plot loss reducing with time
 # ---------
 
-fig, ax = plt.subplots(figsize=(4, 4))
-ax.plot(losses)
+fig, ax = plt.subplots(figsize=(6, 6))
+ax.plot(losses, zorder=2, color=LINE_COLOR)
 ax.set_xlabel('Epoch')
 ax.set_ylabel('Loss')
 ax.xaxis.set_major_locator(MaxNLocator(6))
 ax.yaxis.set_major_locator(MaxNLocator(6))
-fig.tight_layout()
+ax.grid(zorder=1)
+fig.tight_layout(pad=0.20)
 save_plot(plt, suffix='01')
 
 
 # Compare predictions with data
 # ------
 
-fig, ax = plt.subplots(figsize=(4, 4))
+fig, ax = plt.subplots(figsize=(6, 6))
+
 ax.scatter(
     Y / 1000,
-    (y_pred * Y_std + Y_mean) / 1000
+    (y_pred * Y_std + Y_mean) / 1000,
+    s=MARKER_SIZE,
+    facecolor=MARKER_FACE_COLOR,
+    edgecolor=MARKER_EDGE_COLOR,
+    linewidth=MARKER_EDGE_WIDTH,
+    zorder=3
 )
 
 lims = np.array([
     ax.get_xlim(),
     ax.get_ylim()
 ])
+
 lims = (np.min(lims), np.max(lims))
+
 ax.plot(
     lims,
     lims,
     lw=1,
     ls=":",
     c="#666666",
-    zorder=-1
+    zorder=2
 )
+
 ax.set_xlim(lims)
 ax.set_ylim(lims)
 ax.set_xlabel('Actual price USD')
 ax.set_ylabel('Predicted price USD')
 ax.xaxis.set_major_locator(MaxNLocator(6))
 ax.yaxis.set_major_locator(MaxNLocator(6))
-fig.tight_layout()
+ax.grid(zorder=1)
+fig.tight_layout(pad=0.20)
 save_plot(plt, suffix='02')
 
 print('We are done!')
