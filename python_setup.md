@@ -43,7 +43,7 @@ It will install the exact versions of Python libraries that were used by Python 
 
 ## Clean up
 
-To remove the `evgenii_2021_compastro` conda environment completely and free up disk space:
+To remove the `uni_2021_data_analysis_problem_sets` conda environment completely and free up disk space:
 
 ```
 conda deactivate
