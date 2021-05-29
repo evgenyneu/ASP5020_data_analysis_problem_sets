@@ -1,0 +1,129 @@
+\documentclass[a4paper,twoside,12pt,hidelinks]{extarticle}
+
+
+% Packages
+% ---------------------
+
+\usepackage{fancyhdr} % Head and foot options
+\usepackage{hyperref} % Uses automatic references \autoref
+\usepackage{titletoc} % Style table of contents with dots
+\usepackage[T1]{fontenc}
+\usepackage{libertine}
+\usepackage[libertine]{newtxmath} % Font
+\usepackage{graphicx} % Show images
+\usepackage{natbib} % Bibliography
+\usepackage{bm} % Make math bold with $\bm{some math}$
+\usepackage{enumitem} % Customizable lists https://tex.stackexchange.com/a/42907/101976
+
+% Precent figures from being placed too far from the text with
+% \begin{figure}[H]
+% https://tex.stackexchange.com/a/8633/101976
+\usepackage{float}
+
+% Force footnotes to appear at the very bottom of the page
+% https://stackoverflow.com/a/3527521/297131
+\usepackage[bottom]{footmisc}
+
+% Make URLs smaller
+% https://tex.stackexchange.com/a/109750/101976
+\usepackage{relsize}
+\renewcommand*{\UrlFont}{\ttfamily\smaller\relax}
+
+% Physical numbers and units
+\usepackage[separate-uncertainty = true, multi-part-units=single]{siunitx}
+
+% Adjust space before and after section and subsection with titlespacing
+\usepackage{titlesec}
+
+% Add space between table and its caption
+\usepackage{caption}
+
+
+% Typography
+% ---------------------
+
+% Page margins
+\usepackage[top=2.5cm, bottom=2.5cm, left=2.5cm, right=2.5cm]{geometry}
+
+% First line indentation
+\setlength{\parindent}{2em}
+
+% Line spacing
+\renewcommand{\baselinestretch}{1.1}
+
+% Hanging indentation in reference list
+\setlength\bibhang{2em}
+
+% Color the links and references
+\hypersetup{
+    colorlinks=true, linkcolor=blue, filecolor=magenta, urlcolor=blue, citecolor=blue
+}
+
+% Change spacing before and after titles {<left>}{<before-sep>}{<after-sep>}
+% spacing: how to read {12pt plus 4pt minus 2pt}
+%          12pt is what we would like the spacing to be
+%          plus 4pt means that TeX can stretch it by at most 4pt
+%          minus 2pt means that TeX can shrink it by at most 2pt
+% https://tex.stackexchange.com/a/53341
+\titlespacing*{\section}{0pt}{4em plus 2em minus 2em}{2em plus 1em minus 1em}
+\titlespacing*{\subsection}{0pt}{2em plus 1em minus 1em}{1em plus .5em minus .5em}
+
+% Decrease the distance between a figure and its label
+% https://tex.stackexchange.com/a/45996/101976
+\setlength{\abovecaptionskip}{5pt plus 3pt minus 3pt}
+
+% Prevent stretching content vertically and adding empty space
+\raggedbottom
+
+% only chapters and above in ToC
+\setcounter{tocdepth}{2}
+
+% Left-align left with paragraph (enumitem package)
+\setlist{leftmargin=\parindent}
+
+% Space between the text body and the footnotes:
+% https://stackoverflow.com/a/783751/297131
+\setlength{\skip\footins}{0.7cm}
+
+% Approximatelly proportional symbol
+% https://tex.stackexchange.com/a/33547/101976
+\newcommand{\appropto}{\mathrel{\vcenter{
+  \offinterlineskip\halign{\hfil$##$\cr
+    \propto\cr\noalign{\kern2pt}\sim\cr\noalign{\kern-2pt}}}}}
+
+% Title page
+% ----------
+
+\title{\large Literature Review \\\vspace{0.5cm}\Large Science and numerology of stellar convection modelling}
+\author{Evgenii Neumerzhitckii\\Student ID: 27889076\vspace{0.3cm}\\Supervised by Simon Campbell}
+\date{May 14, 2021}
+
+\begin{document}
+
+\maketitle
+\thispagestyle{empty} % Remove page number from title page
+
+\input{parts/000_abstract}
+\pagebreak
+
+\vspace{3.5cm} % Add space between the title and table of contents
+\tableofcontents
+\thispagestyle{empty} % Remove page number from title page
+\pagebreak
+
+
+% Header and footer
+% ---------------------
+
+\pagestyle{fancy}
+\fancyhf{}
+\fancyhead[C]{Simulations of stellar convection}
+\fancyhead[LE,RO]{\thepage}
+
+
+% Parts
+% ---------------------
+
+\input{parts/q1}
+
+\end{document}
