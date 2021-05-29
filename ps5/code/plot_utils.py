@@ -2,7 +2,62 @@
 
 import os
 import inspect
-import numpy as np
+import matplotlib.pyplot as plt
+
+# Line styles
+LINE_COLOR = '#0060ff'
+
+# Default marker styles
+MARKER_SIZE = 200
+MARKER_FACE_COLOR = '#bcd5fdaa'
+MARKER_EDGE_COLOR = '#0060ff'
+MARKER_EDGE_WIDTH = 1.5
+
+
+def set_plot_style():
+    """Set global style"""
+
+    plt.rcParams['font.family'] = 'serif'
+
+    TINY_SIZE = 13
+    SMALL_SIZE = 18
+    NORMAL_SIZE = 20
+    LARGE_SIZE = 23
+
+    # Title size
+    plt.rcParams['axes.titlesize'] = LARGE_SIZE
+
+    # Axes label size
+    plt.rcParams['axes.labelsize'] = SMALL_SIZE
+
+    # Tick label size
+    plt.rcParams['xtick.labelsize'] = TINY_SIZE
+    plt.rcParams['ytick.labelsize'] = TINY_SIZE
+
+    # Legend text size
+    plt.rcParams['legend.fontsize'] = SMALL_SIZE
+
+    plt.rcParams['font.size'] = NORMAL_SIZE
+    plt.rcParams['legend.fontsize'] = NORMAL_SIZE
+
+    # Legend location
+    plt.rcParams["legend.loc"] = 'upper right'
+    plt.rcParams["legend.framealpha"] = 0.9
+    plt.rcParams["legend.edgecolor"] = '#000000'
+
+    # Grid color
+    plt.rcParams['grid.color'] = '#cccccc'
+
+    # Define plot size
+    plt.rcParams['figure.figsize'] = [9, 6]
+
+    # Lines
+    plt.rcParams['lines.color'] = 'red'
+    plt.rcParams['lines.linewidth'] = 2
+
+    # Grid
+    plt.rcParams['grid.color'] = '#555555'
+    plt.rcParams['grid.alpha'] = 0.2
 
 
 def save_plot(plt, suffix=None, extensions=['pdf'], subdir='plots', dpi=300,

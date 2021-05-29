@@ -1,47 +1,6 @@
 import pandas as pd
 import matplotlib.pyplot as plt
-from plot_utils import save_plot
-
-
-def set_plot_style():
-    """Set global style"""
-
-    plt.rcParams['font.family'] = 'serif'
-
-    TINY_SIZE = 15
-    SMALL_SIZE = 18
-    NORMAL_SIZE = 22
-    LARGE_SIZE = 25
-
-    # Title size
-    plt.rcParams['axes.titlesize'] = LARGE_SIZE
-
-    # Axes label size
-    plt.rcParams['axes.labelsize'] = LARGE_SIZE
-
-    # Tick label size
-    plt.rcParams['xtick.labelsize'] = TINY_SIZE
-    plt.rcParams['ytick.labelsize'] = TINY_SIZE
-
-    # Legend text size
-    plt.rcParams['legend.fontsize'] = SMALL_SIZE
-
-    plt.rcParams['font.size'] = NORMAL_SIZE
-    plt.rcParams['legend.fontsize'] = NORMAL_SIZE
-
-    # Legend location
-    plt.rcParams["legend.loc"] = 'upper right'
-    plt.rcParams["legend.framealpha"] = 0.9
-    plt.rcParams["legend.edgecolor"] = '#000000'
-
-    # Grid color
-    plt.rcParams['grid.color'] = '#cccccc'
-
-    # Define plot size
-    plt.rcParams['figure.figsize'] = [9, 6]
-
-    # Marker size
-    plt.rcParams['lines.markersize'] = 20
+from plot_utils import save_plot, set_plot_style, MARKER_EDGE_WIDTH, MARKER_SIZE
 
 
 def plot_type(ax, df, type, marker, facecolor, edgecolor):
@@ -72,7 +31,8 @@ def plot_type(ax, df, type, marker, facecolor, edgecolor):
         marker=marker,
         facecolor=facecolor,
         edgecolor=edgecolor,
-        linewidth=2,
+        s=MARKER_SIZE,
+        linewidth=MARKER_EDGE_WIDTH,
         zorder=5
     )
 
@@ -98,7 +58,8 @@ def plot_data(path_to_data):
     ax.set_xlabel(r'$x_1$')
     ax.grid(zorder=1)
     ax.set_ylabel(r'$x_2$')
-    fig.tight_layout()
+    plt.subplots_adjust(left=0, right=1, top=1, bottom=0)
+    fig.tight_layout(pad=0.20)
     save_plot(fig)
 
 
