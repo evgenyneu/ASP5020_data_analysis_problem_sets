@@ -21,20 +21,44 @@ The diagram of the neural network is shown on \autoref{q1_network_diagram}. I ch
 
 \subsection*{Removing sigmoid from output layer}
 
-In Lecture 13 example code (\url{http://astrowizici.st/teaching/phs5000/13/}), I removed the sigmoid for the output node (replacing it with $f(x) = x$). The reason I removed the sigmoid is the following. The output of the sigmoid is between 0 and 1, and this is used as predicted value from our model. However, in the loss function, we are comparing the predicted values with real values. The problem is that real value sometime outside the $[0, 1]$ range because they are normalized with mean $0$ and standard deviation of $1$. Consequently, the loss function will never approach zero. More importantly, the output of the model can not be used to generate the data.
+In Lecture 13 example code (\url{http://astrowizici.st/teaching/phs5000/13/}), I removed the sigmoid for the output node (replacing it with $f(x) = x$). The reason I removed the sigmoid is the following. The output of the sigmoid is between 0 and 1, and this is used as predicted value from our model. However, in the loss function, we are comparing the predicted values with real values.
 
-I compare the loss function of the original and the modified models on \autoref{q1_lecture13_loss_compare}. We can see the modified model converges faster. The original will never converge to zero, even if we increase the number of interations.
+I compare the loss function of the original and the modified models on \autoref{q1_lecture13_loss_compare}. We can see the modified model converges faster. The original will never converge to zero, even if we increase the number of interations. The comparison of real and predicted values for two codes are shown on \autoref{q1_lecture13_data_prediction_compare}.
 
 \begin{figure}[!ht]
   \centering
   \includegraphics[width=1\textwidth]{figures/lecture13_loss_compared.pdf}
-  \caption{Loss function for neural network from Lecture 13. The original code (left) contains sigmoid activation function in the output node, while the modified code (right) has no activation function ($f(x) = x$) in the output node. Both codes are otherwise identical, including the same seeding of random number generators.}
+  \caption{Loss function for neural network from Lecture 13. The original code (left) contains sigmoid activation function in the output node, while the modified code (right) has no activation function ($f(x) = x$) in the output node. Both codes are otherwise identical, including the same seeding of random number generators. The loss function of the original code (left) converges more slowly and never approaches zero. This is caused by mismatch between the data values, which are normalized with mean zero and standard deviation of 1, and the range $[0, 1]$ of the sigmoid function.}
   \label{q1_lecture13_loss_compare}
 \end{figure}
+
+
+\begin{figure}[!ht]
+  \centering
+  \includegraphics[width=1\textwidth]{figures/lecture13_results_compared.pdf}
+  \caption{Comparison of model prediction (x axis) with data (y axis) for neural network code from Lecture 13. The original code (left) performes worse because because it's output range is limited to $[0, 1]$ multiplied by standard deviation of the data and mean added.}
+  \label{q1_lecture13_data_prediction_compare}
+\end{figure}
+
+
 
 Original code: \\ \url{https://github.com/evgenyneu/ASP5020_data_analysis_problem_sets/blob/master/ps5/code/lecture13_original_with_signoid_output.py}
 
 Modified code without output sigmoid: \\ \url{https://github.com/evgenyneu/ASP5020_data_analysis_problem_sets/blob/master/ps5/code/lecture13_remove_sigmoid_from_output.py}
+
+The code changes are shown on \autoref{q1_lecture13_removing_loss_function}.
+
+
+\begin{figure}[!ht]
+  \centering
+  \includegraphics[width=0.8\textwidth]{figures/q1_lecture13_code_changes.png}
+  \caption{Code changes that show removal of the sigmoid loss function from the output node.}
+  \label{q1_lecture13_removing_loss_function}
+\end{figure}
+
+
+
+
 
 
 
