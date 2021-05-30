@@ -33,6 +33,8 @@
     colorlinks=true, linkcolor=blue, filecolor=magenta, urlcolor=blue, citecolor=blue
 }
 
+\renewcommand{\UrlFont}{\small}
+
 % Change spacing before and after titles {<left>}{<before-sep>}{<after-sep>}
 % spacing: how to read {12pt plus 4pt minus 2pt}
 %          12pt is what we would like the spacing to be
@@ -54,6 +56,11 @@
 \dottedcontents{section}[2em]{\bfseries}{2em}{1pc} % Use dots in the table of contents
 \dottedcontents{subsection}[3em]{}{2em}{1pc} % Use dots in the table of contents
 
+
+% Adjust spacing between apragraphs
+% https://tex.stackexchange.com/a/375896
+\setlength\parskip{1em plus 0.1em minus 0.2em}
+\setlength\parindent{0pt}
 
 % Title page
 % ----------
