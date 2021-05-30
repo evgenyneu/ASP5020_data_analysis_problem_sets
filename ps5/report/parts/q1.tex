@@ -19,7 +19,7 @@ The diagram of the neural network is shown on \autoref{q1_network_diagram}. I ch
 \end{figure}
 
 
-\subsection*{Removing sigmoid from output layer}
+\subsection{Why I don't use sigmoid in the output layer?}
 
 I do not use the sigmoid activation function in the output neuron because of the problem I found in the the Lecture 13 example code (\url{http://astrowizici.st/teaching/phs5000/13/}). I modified the code and replaced the sigmoid with $f(x) = x$ function. This was done because the output of the sigmoid is between 0 and 1, and it is used as predicted value from our model. However, in the loss function, we are comparing the predicted values with real values, which fall outside the $[0, 1]$ range. Therefore, the predicted value can never, even in theory, match the data. This mismatch is shown on \autoref{q1_lecture13_loss_compare}, where I compare the loss function of the original and the modified models. We can see that the modified model converges faster. The loss function for the original model will never approach zero, even if we increase the number of interations because of the range difference between the sigmoid and the data. The comparison of real and predicted values for the two codes are shown on \autoref{q1_lecture13_data_prediction_compare}. We can see that the original model can not be used for generating predicted values, since its range is limited.
 
@@ -56,7 +56,81 @@ The code changes are shown on \autoref{q1_lecture13_removing_loss_function}.
 
 
 
+\subsection{Equations for the neuron inputs and outpus}
+
+I will use $a$ and $b$ for input and output value of a neuron respectively, so $a_{h2}$, for example is the inpu tvalue of the $h_2$ neuron, and $b_{h2}$ is it's output value. Then, for the hidden layer the inputs are
+\begin{align}
+  \label{eq_q1_hidden_neurons_inputs}
+  \begin{split}
+    a_{h1} &= w_1 + x_1 w_4 + x_2 w_7 \\
+    a_{h2} &= w_2 + x_1 w_4 + x_2 w_8 \\
+    a_{h3} &= w_3 + x_1 w_6 + x_2 w_6.
+  \end{split}
+\end{align}
+The outputs are
+\begin{align}
+  \label{eq_q1_hidden_neurons_outputs}
+  \begin{split}
+    b_{h1} &= \text{sigmoid}(a_{h1}) \\
+    b_{h2} &= \text{sigmoid}(a_{h2}) \\
+    b_{h3} &= \text{sigmoid}(a_{h3}),
+  \end{split}
+\end{align}
+where $\text{sigmoid}$ is my chosen activation function
+\[
+\text{sigmoid}(x) = \frac{1}{1 + e^{-x}}.
+\]
+The input and output of the output node are the same, since I chose not to use an an activation function:
+\begin{equation}
+  a_{o1} = w_{10} + b_{h1} w_{11} + b_{h2} w_{12} + b_{h3} w_{13}.
+  \label{eq_q1_output_value}
+\end{equation}
 
 
+\subsection{The loss function}
+
+The loss function is
+\begin{align}
+  E = 0.5 (y - a_{o1})^2,
+  \label{eq_q1_loss_function}
+\end{align}
+where $y$ is the observed binary value (0 or 1).
 
 
+\subsection{Derivatives of the loss function}
+
+Next, I calculate the derivatives of the loss function with respect to all the weights. For the weight $w$ coming from the hidden layer, the derivatives are calculated using equation
+\begin{align*}
+  \frac{\partial E}{\partial w} = \frac{\partial E}{\partial a_o} \frac{\partial a_o} {\partial w}.
+\end{align*}
+Next, I substitute $E$ and $a_o$ from Equations \ref{eq_q1_output_value} and \ref{eq_q1_loss_function} and calculate the derivatives for all the hidden layer weights:
+\begin{align*}
+  \frac{\partial E}{\partial w_{10}} &= a_{o1} - y \\
+  \frac{\partial E}{\partial w_{11}} &= (a_{o1} - y) b_{h1} \\
+  \frac{\partial E}{\partial w_{12}} &= (a_{o1} - y) b_{h2} \\
+  \frac{\partial E}{\partial w_{13}} &= (a_{o1} - y) b_{h3}.
+\end{align*}
+For a weight coming form the input layer, the derivative is calculated with equation
+\begin{align*}
+  \frac{\partial E}{\partial w} = \frac{\partial E}{\partial a_o} \frac{\partial a_o} {\partial b_h} \frac{\partial b_h} {\partial a_h} \frac{\partial a_h} {\partial w}.
+\end{align*}
+Here I use \autoref{eq_q1_hidden_neurons_outputs} for $b_h$ and \autoref{eq_q1_hidden_neurons_inputs} for $a_h$ and calculate the derivatives for all the input weights:
+\begin{align*}
+  \frac{\partial E}{\partial w_{1}} &= (a_{o1} - y) w_{11} b_{h1} (1 - b_{h1}) \\
+  \frac{\partial E}{\partial w_{2}} &= (a_{o1} - y) w_{12} b_{h2} (1 - b_{h2}) \\
+  \frac{\partial E}{\partial w_{3}} &= (a_{o1} - y) w_{13} b_{h3} (1 - b_{h3}) \\
+  \frac{\partial E}{\partial w_{4}} &= (a_{o1} - y) w_{11} b_{h1} (1 - b_{h1}) x_1 \\
+  \frac{\partial E}{\partial w_{5}} &= (a_{o1} - y) w_{12} b_{h2} (1 - b_{h2}) x_1 \\
+  \frac{\partial E}{\partial w_{6}} &= (a_{o1} - y) w_{14} b_{h3} (1 - b_{h3}) x_1 \\
+  \frac{\partial E}{\partial w_{7}} &= (a_{o1} - y) w_{11} b_{h1} (1 - b_{h1}) x_2 \\
+  \frac{\partial E}{\partial w_{8}} &= (a_{o1} - y) w_{12} b_{h2} (1 - b_{h2}) x_2 \\
+  \frac{\partial E}{\partial w_{9}} &= (a_{o1} - y) w_{14} b_{h3} (1 - b_{h3}) x_2.
+\end{align*}
+
+\subsection{Updateing the weights}
+
+The equation for updating a weight is
+\[
+  w^{i+1} = w^{i} - e \sum_{j=1}^{N} \frac{\partial E(y_j)}{\partial w},
+\]
+where $w^{i+1}$ and $w^{i}$ are the weight values for the current and the previous iterations respectively, $e$ is a learning rate (a small number like $0.001$), $N$ is the number of observations and $y_j$ is the $j-th$ observation.
