@@ -1,6 +1,6 @@
 # Python code set up
 
-These are instructions for installing Python and its libraries that are needed for making plots of the simulation output.
+These are instructions for installing Python and its libraries that are needed for running the python scripts.
 
 ## Install Miniconda
 
