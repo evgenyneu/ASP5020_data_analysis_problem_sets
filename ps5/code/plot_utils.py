@@ -60,7 +60,7 @@ def set_plot_style():
     plt.rcParams['grid.alpha'] = 0.2
 
 
-def save_plot(plt, suffix=None, extensions=['svg'], subdir='plots', dpi=300,
+def save_plot(plt, suffix=None, extensions=['pdf'], subdir='plots', dpi=300,
               silent=False):
     """
     Saves a plot to an image file. The name of the

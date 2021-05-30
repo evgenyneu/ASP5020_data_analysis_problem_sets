@@ -22,7 +22,7 @@
         {
             "label": "Clear LaTeX",
             "type": "shell",
-            "command": "rm -f 'assignment.aux'",
+            "command": "cd ps5/report && rm -f 'assignment.aux'",
             "problemMatcher": []
         },
         {
