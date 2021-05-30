@@ -201,7 +201,7 @@ for epoch in range(num_epochs):
 # ---------
 
 fig, ax = plt.subplots(figsize=(6, 6))
-ax.plot(losses, zorder=2, color=LINE_COLOR)
+ax.plot(losses, zorder=2, color='#ff0021')
 ax.set_xlabel('Epoch')
 ax.set_ylabel('Loss')
 ax.xaxis.set_major_locator(MaxNLocator(6))
@@ -220,8 +220,8 @@ ax.scatter(
     Y / 1000,
     (y_pred * Y_std + Y_mean) / 1000,
     s=MARKER_SIZE,
-    facecolor=MARKER_FACE_COLOR,
-    edgecolor=MARKER_EDGE_COLOR,
+    facecolor='#febcc4aa',
+    edgecolor='#ff0021',
     linewidth=MARKER_EDGE_WIDTH,
     zorder=3
 )
