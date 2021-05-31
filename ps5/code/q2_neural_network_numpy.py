@@ -138,6 +138,27 @@ def run_model(N, hidden_layer_inputs, hidden_layer_weights, output_layer_weights
     return output_layer_inputs @ output_layer_weights, hidden_layer_outputs
 
 
+def calculate_gradients(x, y, N, y_pred, beta_h, output_layer_weights, gradients):
+    w11 = output_layer_weights[1, 0]
+    w12 = output_layer_weights[2, 0]
+    w13 = output_layer_weights[3, 0]
+
+    s = (y_pred - y)
+    gradients[12] = np.sum(s * beta_h[:, [2]])
+    gradients[11] = np.sum(s * beta_h[:, [1]])
+    gradients[10] = np.sum(s * beta_h[:, [0]])
+    gradients[9] = np.sum(s)
+    gradients[8] = np.sum(s * w13 * beta_h[:, [2]] * (1 - beta_h[:, [2]]) * x[:, [1]])
+    gradients[7] = np.sum(s * w12 * beta_h[:, [1]] * (1 - beta_h[:, [1]]) * x[:, [1]])
+    gradients[6] = np.sum(s * w11 * beta_h[:, [0]] * (1 - beta_h[:, [0]]) * x[:, [1]])
+    gradients[5] = np.sum(s * w13 * beta_h[:, [2]] * (1 - beta_h[:, [2]]) * x[:, [0]])
+    gradients[4] = np.sum(s * w12 * beta_h[:, [1]] * (1 - beta_h[:, [1]]) * x[:, [0]])
+    gradients[3] = np.sum(s * w11 * beta_h[:, [0]] * (1 - beta_h[:, [0]]) * x[:, [0]])
+    gradients[2] = np.sum(s * w13 * beta_h[:, [2]] * (1 - beta_h[:, [2]]))
+    gradients[1] = np.sum(s * w12 * beta_h[:, [1]] * (1 - beta_h[:, [1]]))
+    gradients[0] = np.sum(s * w11 * beta_h[:, [0]] * (1 - beta_h[:, [0]]))
+
+
 def run():
     """An entry point of the script"""
 
@@ -192,19 +213,10 @@ def run():
 
     num_epochs = 1000
     losses = np.empty(num_epochs)
+    gradients = np.empty(13)
 
     eta = 1e-3
     for epoch in range(num_epochs):
-        hidden_layer_weights = np.array([
-            [w1,  w2,  w3],
-            [w4,  w5,  w6],
-            [w7,  w8,  w9]
-        ])
-
-        output_layer_weights = np.array([
-            [w10, w11, w12, w13]
-        ]).T
-
         y_pred, beta_h = run_model(
             N, hidden_layer_inputs,
             hidden_layer_weights, output_layer_weights)
@@ -218,36 +230,22 @@ def run():
 
         losses[epoch] = loss
 
-        # Calculate gradients
-        s = (y_pred - y)
-        dE_dw13 = s * beta_h[:, [2]]
-        dE_dw12 = s * beta_h[:, [1]]
-        dE_dw11 = s * beta_h[:, [0]]
-        dE_dw10 = s
-        dE_dw9 = s * w13 * beta_h[:, [2]] * (1 - beta_h[:, [2]]) * x[:, [1]]
-        dE_dw8 = s * w12 * beta_h[:, [1]] * (1 - beta_h[:, [1]]) * x[:, [1]]
-        dE_dw7 = s * w11 * beta_h[:, [0]] * (1 - beta_h[:, [0]]) * x[:, [1]]
-        dE_dw6 = s * w13 * beta_h[:, [2]] * (1 - beta_h[:, [2]]) * x[:, [0]]
-        dE_dw5 = s * w12 * beta_h[:, [1]] * (1 - beta_h[:, [1]]) * x[:, [0]]
-        dE_dw4 = s * w11 * beta_h[:, [0]] * (1 - beta_h[:, [0]]) * x[:, [0]]
-        dE_dw3 = s * w13 * beta_h[:, [2]] * (1 - beta_h[:, [2]])
-        dE_dw2 = s * w12 * beta_h[:, [1]] * (1 - beta_h[:, [1]])
-        dE_dw1 = s * w11 * beta_h[:, [0]] * (1 - beta_h[:, [0]])
+        calculate_gradients(x, y, N, y_pred, beta_h, output_layer_weights, gradients)
 
         # Now update the weights using stochastic gradient descent.
-        w1 = w1 - eta * np.sum(dE_dw1)
-        w2 = w2 - eta * np.sum(dE_dw2)
-        w3 = w3 - eta * np.sum(dE_dw3)
-        w4 = w4 - eta * np.sum(dE_dw4)
-        w5 = w5 - eta * np.sum(dE_dw5)
-        w6 = w6 - eta * np.sum(dE_dw6)
-        w7 = w7 - eta * np.sum(dE_dw7)
-        w8 = w8 - eta * np.sum(dE_dw8)
-        w9 = w9 - eta * np.sum(dE_dw9)
-        w10 = w10 - eta * np.sum(dE_dw10)
-        w11 = w11 - eta * np.sum(dE_dw11)
-        w12 = w12 - eta * np.sum(dE_dw12)
-        w13 = w13 - eta * np.sum(dE_dw13)
+        hidden_layer_weights[0, 0] -= eta * gradients[0]  # w1
+        hidden_layer_weights[0, 1] -= eta * gradients[1]  # w2
+        hidden_layer_weights[0, 2] -= eta * gradients[2]  # w3
+        hidden_layer_weights[1, 0] -= eta * gradients[3]  # w4
+        hidden_layer_weights[1, 1] -= eta * gradients[4]  # w5
+        hidden_layer_weights[1, 2] -= eta * gradients[5]  # w6
+        hidden_layer_weights[2, 0] -= eta * gradients[6]  # w7
+        hidden_layer_weights[2, 1] -= eta * gradients[7]  # w8
+        hidden_layer_weights[2, 2] -= eta * gradients[8]  # w9
+        output_layer_weights[0, 0] -= eta * gradients[9]  # w10
+        output_layer_weights[1, 0] -= eta * gradients[10] # w11
+        output_layer_weights[2, 0] -= eta * gradients[11] # w12
+        output_layer_weights[3, 0] -= eta * gradients[12] # w13
 
     # Plot loss reducing with time
     # ---------
