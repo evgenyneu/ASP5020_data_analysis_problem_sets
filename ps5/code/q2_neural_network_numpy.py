@@ -1,8 +1,110 @@
 import numpy as np
+from scipy.optimize import check_grad
 import pandas as pd
 import matplotlib.pyplot as plt
 from matplotlib.ticker import MaxNLocator
 from plot_utils import save_plot, set_plot_style, MARKER_EDGE_WIDTH, MARKER_SIZE
+
+
+def f(p, x, y, N):
+    w1, w2, w3, w4, w5, w6, w7, w8, w9, w10, w11, w12, w13 = p
+
+    # Hidden layer.
+    hidden_layer_inputs = np.hstack([
+        np.ones((N, 1)),
+        x
+    ])
+
+    hidden_layer_weights = np.array([
+        [w1,  w2,  w3],
+        [w4,  w5,  w6],
+        [w7,  w8,  w9]
+    ])
+
+    alpha_h = hidden_layer_inputs @ hidden_layer_weights
+    beta_h = sigmoid(alpha_h)
+
+    # Output layer.
+    output_layer_inputs = np.hstack([
+        np.ones((N, 1)),
+        beta_h
+    ])
+
+    output_layer_weights = np.array([
+        [w10, w11, w12, w13]
+    ]).T
+
+    alpha_o = output_layer_inputs @ output_layer_weights
+    beta_o = alpha_o  # No activation function on output neuron
+    y_pred = beta_o
+
+    # Calculate our loss function: the average error in our predictions
+    # compared to the target.
+    # (This is also known as the mean squared error).
+    return 0.5 * np.sum((y_pred - y)**2)
+
+
+def g(p, x, y, N):
+    w1, w2, w3, w4, w5, w6, w7, w8, w9, w10, w11, w12, w13 = p
+
+    # Hidden layer.
+    hidden_layer_inputs = np.hstack([
+        np.ones((N, 1)),
+        x
+    ])
+
+    hidden_layer_weights = np.array([
+        [w1,  w2,  w3],
+        [w4,  w5,  w6],
+        [w7,  w8,  w9]
+    ])
+
+    alpha_h = hidden_layer_inputs @ hidden_layer_weights
+    beta_h = sigmoid(alpha_h)
+
+    # Output layer.
+    output_layer_inputs = np.hstack([
+        np.ones((N, 1)),
+        beta_h
+    ])
+
+    output_layer_weights = np.array([
+        [w10, w11, w12, w13]
+    ]).T
+
+    alpha_o = output_layer_inputs @ output_layer_weights
+
+    # Calculate gradients
+    s = (alpha_o - y)
+    dE_dw13 = s * beta_h[:, [2]]
+    dE_dw12 = s * beta_h[:, [1]]
+    dE_dw11 = s * beta_h[:, [0]]
+    dE_dw10 = s
+    dE_dw9 = s * w13 * beta_h[:, [2]] * (1 - beta_h[:, [2]]) * x[:, [1]]
+    dE_dw8 = s * w12 * beta_h[:, [1]] * (1 - beta_h[:, [1]]) * x[:, [1]]
+    dE_dw7 = s * w11 * beta_h[:, [0]] * (1 - beta_h[:, [0]]) * x[:, [1]]
+    dE_dw6 = s * w13 * beta_h[:, [2]] * (1 - beta_h[:, [2]]) * x[:, [0]]
+    dE_dw5 = s * w12 * beta_h[:, [1]] * (1 - beta_h[:, [1]]) * x[:, [0]]
+    dE_dw4 = s * w11 * beta_h[:, [0]] * (1 - beta_h[:, [0]]) * x[:, [0]]
+    dE_dw3 = s * w13 * beta_h[:, [2]] * (1 - beta_h[:, [2]])
+    dE_dw2 = s * w12 * beta_h[:, [1]] * (1 - beta_h[:, [1]])
+    dE_dw1 = s * w11 * beta_h[:, [0]] * (1 - beta_h[:, [0]])
+
+    return np.array([
+        np.sum(dE_dw1),
+        np.sum(dE_dw2),
+        np.sum(dE_dw3),
+        np.sum(dE_dw4),
+        np.sum(dE_dw5),
+        np.sum(dE_dw6),
+        np.sum(dE_dw7),
+        np.sum(dE_dw8),
+        np.sum(dE_dw9),
+        np.sum(dE_dw10),
+        np.sum(dE_dw11),
+        np.sum(dE_dw12),
+        np.sum(dE_dw13)
+    ])
 
 
 def read_data():
@@ -32,6 +134,8 @@ def run():
     x = normalize(X)
     N = x.shape[0]  # Number of observations
     H = 3  # The number of neurons in the hidden layer.
+
+    assert check_grad(f, g, np.random.normal(size=13), x, y, N) < 1e-4
 
     # Weights for the bias terms in input layer
     w1, w2, w3 = np.random.randn(H)
