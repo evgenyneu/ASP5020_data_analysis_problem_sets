@@ -126,6 +126,18 @@ def sigmoid(x):
     return 1 / (1 + np.exp(-x))
 
 
+def run_model(N, hidden_layer_inputs, hidden_layer_weights, output_layer_weights):
+    hidden_layer_sums = hidden_layer_inputs @ hidden_layer_weights
+    hidden_layer_outputs = sigmoid(hidden_layer_sums)
+
+    output_layer_inputs = np.hstack([
+        np.ones((N, 1)),
+        hidden_layer_outputs
+    ])
+
+    return output_layer_inputs @ output_layer_weights, hidden_layer_outputs
+
+
 def run():
     """An entry point of the script"""
 
@@ -149,8 +161,6 @@ def run():
     # Weights for hidden layer outputs to output neuron
     w10, w11, w12, w13 = np.random.randn(H + 1)
 
-    # Ok, let's code up our neural network!
-
     # Hidden layer.
     hidden_layer_inputs = np.hstack([
         np.ones((N, 1)),
@@ -163,27 +173,19 @@ def run():
         [w7,  w8,  w9]
     ])
 
-    hidden_layer_sums = hidden_layer_inputs @ hidden_layer_weights
-    hidden_layer_outputs = sigmoid(hidden_layer_sums)
-
-    # Output layer.
-    output_layer_inputs = np.hstack([
-        np.ones((N, 1)),
-        hidden_layer_outputs
-    ])
-
     output_layer_weights = np.array([
         [w10, w11, w12, w13]
     ]).T
 
-    output_layer_outputs = output_layer_inputs @ output_layer_weights
+    output_layer_outputs, _ = run_model(
+        N, hidden_layer_inputs,
+        hidden_layer_weights, output_layer_weights)
 
     # Calculate our loss function: the total error in our predictions
     # compared to the target.
     loss = 0.5 * np.sum((output_layer_outputs - y)**2)
 
     print(f"Initial loss: {loss:.0e}")
-
 
     # Back propagation
     # ---------
@@ -193,35 +195,19 @@ def run():
 
     eta = 1e-3
     for epoch in range(num_epochs):
-        # Hidden layer.
-        hidden_layer_inputs = np.hstack([
-            np.ones((N, 1)),
-            x
-        ])
-
         hidden_layer_weights = np.array([
             [w1,  w2,  w3],
             [w4,  w5,  w6],
             [w7,  w8,  w9]
         ])
 
-        alpha_h = hidden_layer_inputs @ hidden_layer_weights
-        beta_h = sigmoid(alpha_h)
-
-        # Output layer.
-        output_layer_inputs = np.hstack([
-            np.ones((N, 1)),
-            beta_h
-        ])
-
         output_layer_weights = np.array([
             [w10, w11, w12, w13]
         ]).T
 
-
-        alpha_o = output_layer_inputs @ output_layer_weights
-        beta_o = alpha_o  # No activation function on output neuron
-        y_pred = beta_o
+        y_pred, beta_h = run_model(
+            N, hidden_layer_inputs,
+            hidden_layer_weights, output_layer_weights)
 
         # Calculate our loss function: the average error in our predictions
         # compared to the target.
@@ -233,7 +219,7 @@ def run():
         losses[epoch] = loss
 
         # Calculate gradients
-        s = (alpha_o - y)
+        s = (y_pred - y)
         dE_dw13 = s * beta_h[:, [2]]
         dE_dw12 = s * beta_h[:, [1]]
         dE_dw11 = s * beta_h[:, [0]]
