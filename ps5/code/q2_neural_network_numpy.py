@@ -181,6 +181,39 @@ def loss_function(y, y_pred):
     return 0.5 * np.sum((y_pred - y)**2)
 
 
+def make_input(x, n_inputs):
+    return np.hstack([
+        np.ones((n_inputs, 1)),
+        x
+    ])
+
+
+def generate_weights(n_hidden):
+
+    # Weights for the bias terms in input layer
+    w1, w2, w3 = np.random.randn(n_hidden)
+
+    # Weights for x1 to hidden layer neurons
+    w4, w5, w6 = np.random.randn(n_hidden)
+
+    # Weights for x2 to hidden layer neurons
+    w7, w8, w9 = np.random.randn(n_hidden)
+
+    # Weights for hidden layer outputs to output neuron
+    w10, w11, w12, w13 = np.random.randn(n_hidden + 1)
+
+    hidden_layer_weights = np.array([
+        [w1,  w2,  w3],
+        [w4,  w5,  w6],
+        [w7,  w8,  w9]
+    ])
+
+    output_layer_weights = np.array([
+        [w10, w11, w12, w13]
+    ]).T
+
+    return hidden_layer_weights, output_layer_weights
+
 def run():
     """An entry point of the script"""
 
@@ -192,33 +225,8 @@ def run():
 
     assert check_grad(f, g, np.random.normal(size=13), x, y, N) < 1e-4
 
-    # Weights for the bias terms in input layer
-    w1, w2, w3 = np.random.randn(H)
-
-    # Weights for x1 to hidden layer neurons
-    w4, w5, w6 = np.random.randn(H)
-
-    # Weights for x2 to hidden layer neurons
-    w7, w8, w9 = np.random.randn(H)
-
-    # Weights for hidden layer outputs to output neuron
-    w10, w11, w12, w13 = np.random.randn(H + 1)
-
-    # Hidden layer.
-    hidden_layer_inputs = np.hstack([
-        np.ones((N, 1)),
-        x
-    ])
-
-    hidden_layer_weights = np.array([
-        [w1,  w2,  w3],
-        [w4,  w5,  w6],
-        [w7,  w8,  w9]
-    ])
-
-    output_layer_weights = np.array([
-        [w10, w11, w12, w13]
-    ]).T
+    hidden_layer_inputs = make_input(x, N)
+    hidden_layer_weights, output_layer_weights = generate_weights(H)
 
     y_pred, _ = run_model(
         N, hidden_layer_inputs,
@@ -233,7 +241,6 @@ def run():
     losses = np.empty(num_epochs)
     gradients = np.empty(13)
 
-    eta = 1e-3
     for epoch in range(num_epochs):
         y_pred, hidden_layer_outputs = run_model(
             N, hidden_layer_inputs,
@@ -242,7 +249,7 @@ def run():
         calculate_gradients(x, y, N, y_pred, hidden_layer_outputs,
                             output_layer_weights, gradients)
 
-        update_weights(gradients, eta, hidden_layer_weights,
+        update_weights(gradients, 1e-3, hidden_layer_weights,
                        output_layer_weights)
 
         # Calculate our loss function
