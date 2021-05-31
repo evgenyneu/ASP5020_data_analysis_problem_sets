@@ -5,7 +5,6 @@ from matplotlib.ticker import MaxNLocator
 from plot_utils import save_plot, set_plot_style, MARKER_EDGE_WIDTH, MARKER_SIZE
 
 
-
 def read_data():
     df = pd.read_csv('data/ps5_data.csv')
     x1 = df['x_1'].to_numpy().reshape((-1, 1))
@@ -28,6 +27,7 @@ def sigmoid(x):
 def run():
     """An entry point of the script"""
 
+    np.random.seed(0)
     X, y = read_data()
     x = normalize(X)
     N = x.shape[0]  # Number of observations
@@ -84,7 +84,7 @@ def run():
     # Back propagation
     # ---------
 
-    num_epochs = 10000
+    num_epochs = 1000
     losses = np.empty(num_epochs)
 
     eta = 1e-3
@@ -166,7 +166,7 @@ def run():
     ax.plot(losses, zorder=2, color='#ff0021')
     ax.set_xlabel('Epoch')
     ax.set_ylabel('Loss')
-    ax.set_ylim([0, 17])
+    ax.set_ylim([0, 10])
     ax.xaxis.set_major_locator(MaxNLocator(6))
     ax.yaxis.set_major_locator(MaxNLocator(6))
     ax.grid(zorder=1)
