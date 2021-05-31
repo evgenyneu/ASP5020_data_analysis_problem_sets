@@ -188,30 +188,10 @@ def make_input(x, n_inputs):
     ])
 
 
-def generate_weights(n_hidden):
-
-    # Weights for the bias terms in input layer
-    w1, w2, w3 = np.random.randn(n_hidden)
-
-    # Weights for x1 to hidden layer neurons
-    w4, w5, w6 = np.random.randn(n_hidden)
-
-    # Weights for x2 to hidden layer neurons
-    w7, w8, w9 = np.random.randn(n_hidden)
-
-    # Weights for hidden layer outputs to output neuron
-    w10, w11, w12, w13 = np.random.randn(n_hidden + 1)
-
-    hidden_layer_weights = np.array([
-        [w1,  w2,  w3],
-        [w4,  w5,  w6],
-        [w7,  w8,  w9]
-    ])
-
-    output_layer_weights = np.array([
-        [w10, w11, w12, w13]
-    ]).T
-
+def generate_weights(n_inputs, n_hidden):
+    weights = np.random.randn((n_inputs + 1) * n_hidden)
+    hidden_layer_weights = weights.reshape(n_inputs + 1, n_hidden)
+    output_layer_weights = np.random.randn(n_hidden + 1).reshape(n_hidden + 1, 1)
     return hidden_layer_weights, output_layer_weights
 
 
@@ -222,10 +202,11 @@ def run():
     X, y = read_data()
     x = normalize(X)
     N = x.shape[0]  # Number of observations
-    H = 3  # The number of neurons in the hidden layer.
+    n_inputs = x.shape[1]
+    n_hidden = 3  # The number of neurons in the hidden layer.
     assert check_grad(f, g, np.random.normal(size=13), x, y, N) < 1e-4
     hidden_layer_inputs = make_input(x, N)
-    hidden_layer_weights, output_layer_weights = generate_weights(H)
+    hidden_layer_weights, output_layer_weights = generate_weights(n_inputs, n_hidden)
 
     y_pred, _ = run_model(
         N, hidden_layer_inputs,
