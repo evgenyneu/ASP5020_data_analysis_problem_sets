@@ -1,5 +1,9 @@
 import numpy as np
 import pandas as pd
+import matplotlib.pyplot as plt
+from matplotlib.ticker import MaxNLocator
+from plot_utils import save_plot, set_plot_style, MARKER_EDGE_WIDTH, MARKER_SIZE
+
 
 
 def read_data():
@@ -154,6 +158,20 @@ def run():
         w11 = w11 - eta * np.sum(dE_dw11)
         w12 = w12 - eta * np.sum(dE_dw12)
         w13 = w13 - eta * np.sum(dE_dw13)
+
+    # Plot loss reducing with time
+    # ---------
+
+    fig, ax = plt.subplots(figsize=(6, 6))
+    ax.plot(losses, zorder=2, color='#ff0021')
+    ax.set_xlabel('Epoch')
+    ax.set_ylabel('Loss')
+    ax.set_ylim([0, 17])
+    ax.xaxis.set_major_locator(MaxNLocator(6))
+    ax.yaxis.set_major_locator(MaxNLocator(6))
+    ax.grid(zorder=1)
+    fig.tight_layout(pad=0.20)
+    save_plot(plt, suffix='01')
 
 
 if __name__ == "__main__":
