@@ -177,6 +177,10 @@ def update_weights(gradients, eta, hidden_layer_weights, output_layer_weights):
     output_layer_weights[3, 0] -= eta * gradients[12] # w13
 
 
+def loss_function(y, y_pred):
+    return 0.5 * np.sum((y_pred - y)**2)
+
+
 def run():
     """An entry point of the script"""
 
@@ -216,15 +220,11 @@ def run():
         [w10, w11, w12, w13]
     ]).T
 
-    output_layer_outputs, _ = run_model(
+    y_pred, _ = run_model(
         N, hidden_layer_inputs,
         hidden_layer_weights, output_layer_weights)
 
-    # Calculate our loss function: the total error in our predictions
-    # compared to the target.
-    loss = 0.5 * np.sum((output_layer_outputs - y)**2)
-
-    print(f"Initial loss: {loss:.0e}")
+    print(f"Initial loss: {loss_function(y, y_pred):.0e}")
 
     # Back propagation
     # ---------
@@ -246,7 +246,7 @@ def run():
                        output_layer_weights)
 
         # Calculate our loss function
-        loss = 0.5 * np.sum((y_pred - y)**2)
+        loss = loss_function(y, y_pred)
 
         if not epoch % 100:
             print(epoch, loss)
