@@ -214,6 +214,7 @@ def generate_weights(n_hidden):
 
     return hidden_layer_weights, output_layer_weights
 
+
 def run():
     """An entry point of the script"""
 
@@ -222,9 +223,7 @@ def run():
     x = normalize(X)
     N = x.shape[0]  # Number of observations
     H = 3  # The number of neurons in the hidden layer.
-
     assert check_grad(f, g, np.random.normal(size=13), x, y, N) < 1e-4
-
     hidden_layer_inputs = make_input(x, N)
     hidden_layer_weights, output_layer_weights = generate_weights(H)
 
