@@ -204,11 +204,12 @@ fig, ax = plt.subplots(figsize=(6, 6))
 ax.plot(losses, zorder=2, color='#ff0021')
 ax.set_xlabel('Epoch')
 ax.set_ylabel('Loss')
+ax.set_ylim([0, 17])
 ax.xaxis.set_major_locator(MaxNLocator(6))
 ax.yaxis.set_major_locator(MaxNLocator(6))
 ax.grid(zorder=1)
 fig.tight_layout(pad=0.20)
-save_plot(plt, suffix='01')
+save_plot(plt, suffix='01', extensions=['svg'])
 
 
 # Compare predictions with data
