@@ -190,7 +190,22 @@ def make_input(x, n_inputs):
 
 def generate_weights(n_inputs, n_hidden):
     weights = np.random.randn((n_inputs + 1) * n_hidden)
+
+    # Make the following inner weights for the inner layer:
+    # [
+    #     [w1,  w2,  w3],
+    #     [w4,  w5,  w6],
+    #     [w7,  w8,  w9]
+    # ]
     hidden_layer_weights = weights.reshape(n_inputs + 1, n_hidden)
+
+    # Outer layer weights:
+    # [
+    #     [w10],
+    #     [w11],
+    #     [w12],
+    #     [w13]
+    # ]
     output_layer_weights = np.random.randn(n_hidden + 1).reshape(n_hidden + 1, 1)
     return hidden_layer_weights, output_layer_weights
 
