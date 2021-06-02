@@ -2,7 +2,7 @@ from scipy.optimize import check_grad
 import numpy as np
 
 from q2_neural_network_numpy import sigmoid, make_input, reshape_weights, \
-     run_model, loss_function, calculate_gradients
+     calculate_model_output, loss_function, calculate_gradients
 
 from pytest import approx
 
@@ -21,7 +21,7 @@ def function(p, x, y, n_inputs, n_hidden):
     hidden_layer_weights, output_layer_weights = reshape_weights(
         hidden_weights, output_weights, n_inputs, n_hidden)
 
-    y_pred, _ = run_model(
+    y_pred, _ = calculate_model_output(
         n_observations, hidden_layer_inputs,
         hidden_layer_weights, output_layer_weights)
 
@@ -38,7 +38,7 @@ def gradient(p, x, y, n_inputs, n_hidden):
     hidden_layer_weights, output_layer_weights = reshape_weights(
         hidden_weights, output_weights, n_inputs, n_hidden)
 
-    y_pred, hidden_layer_outputs = run_model(
+    y_pred, hidden_layer_outputs = calculate_model_output(
             n_observations, hidden_layer_inputs,
             hidden_layer_weights, output_layer_weights)
 

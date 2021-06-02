@@ -28,8 +28,9 @@ def sigmoid(x):
     return 1 / (1 + np.exp(-x))
 
 
-def run_model(n_observations, hidden_layer_inputs, hidden_layer_weights, \
-              output_layer_weights):
+def calculate_model_output(
+        n_observations, hidden_layer_inputs, hidden_layer_weights,
+        output_layer_weights):
 
     hidden_layer_sums = hidden_layer_inputs @ hidden_layer_weights
     hidden_layer_outputs = sigmoid(hidden_layer_sums)
@@ -139,7 +140,7 @@ def train_model(x, y, num_epochs, n_observations, hidden_layer_inputs,
     gradients = np.empty(13)
 
     for epoch in range(num_epochs):
-        y_pred, hidden_layer_outputs = run_model(
+        y_pred, hidden_layer_outputs = calculate_model_output(
             n_observations, hidden_layer_inputs,
             hidden_layer_weights, output_layer_weights)
 
@@ -173,11 +174,20 @@ def plot_losses(losses):
     save_plot(plt, suffix='01')
 
 
-def initialize_and_train_model(X, y):
+def initialize_and_train_model(X, y, n_hidden):
+    """
+    Parameters
+    ----------
+    X, y : 2D array
+        Input data, not-normalized
+
+    n_hidden: int
+        The number of neurons in the hidden layer.
+    """
+
     x = normalize(X)
     n_observations = x.shape[0]  # Number of observations
     n_inputs = x.shape[1]
-    n_hidden = 3  # The number of neurons in the hidden layer.
     hidden_layer_inputs = make_input(x)
 
     hidden_layer_weights, output_layer_weights = generate_weights(
@@ -199,7 +209,7 @@ def entry_point():
     x, y = read_data()
 
     hidden_layer_weights, output_layer_weights, losses = \
-        initialize_and_train_model(x, y)
+        initialize_and_train_model(x, y, n_hidden=3)
 
     plot_losses(losses)
 
