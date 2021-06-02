@@ -2,6 +2,7 @@ import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 from matplotlib.ticker import MaxNLocator
+import matplotlib.cm as cm
 from plot_utils import save_plot, set_plot_style, MARKER_EDGE_WIDTH, MARKER_SIZE
 
 
@@ -174,7 +175,7 @@ def plot_losses(losses):
     save_plot(plt, suffix='01')
 
 
-def initialize_and_train_model(X, y, n_hidden):
+def initialize_and_train_model(X, y, n_hidden, num_epochs):
     """
     Parameters
     ----------
@@ -186,7 +187,7 @@ def initialize_and_train_model(X, y, n_hidden):
     """
 
     x = normalize(X)
-    n_observations = x.shape[0]  # Number of observations
+    n_observations = x.shape[0]
     n_inputs = x.shape[1]
     hidden_layer_inputs = make_input(x)
 
@@ -195,7 +196,7 @@ def initialize_and_train_model(X, y, n_hidden):
     )
 
     losses = train_model(
-        x=x, y=y, num_epochs=1000, n_observations=n_observations,
+        x=x, y=y, num_epochs=num_epochs, n_observations=n_observations,
         hidden_layer_inputs=hidden_layer_inputs,
         hidden_layer_weights=hidden_layer_weights,
         output_layer_weights=output_layer_weights
@@ -204,14 +205,44 @@ def initialize_and_train_model(X, y, n_hidden):
     return hidden_layer_weights, output_layer_weights, losses
 
 
+def plot_predictions(X, y, hidden_layer_weights, output_layer_weights):
+    x = normalize(X)
+    x1_min, x2_min = x.min(axis=0)
+    x1_max, x2_max = x.max(axis=0)
+    n_observations = 10
+    x1_grid = np.linspace(x1_min, x1_max, n_observations)
+    x2_grid = np.linspace(x2_min, x2_max, n_observations)
+
+    mesh = np.zeros([n_observations, n_observations])
+    x1_grid = x1_grid.reshape((-1, 1))
+
+    for i, x2 in enumerate(x2_grid):
+        x2_single = np.array([x2] * len(x2_grid)).reshape((-1, 1))
+        x_data = np.hstack([x1_grid, x2_single])
+        hidden_layer_inputs = make_input(x_data)
+
+        y_pred, hidden_layer_outputs = calculate_model_output(
+            n_observations, hidden_layer_inputs,
+            hidden_layer_weights, output_layer_weights)
+
+        mesh[:, i] = y_pred[:, 0]
+
+    fig, ax = plt.subplots(figsize=(6, 6))
+    x1_mesh, x2_mesh = np.meshgrid(x1_grid, x2_grid)
+    ax.pcolormesh(x1_mesh, x2_mesh, mesh, cmap=cm.gray, shading='auto')
+    fig.tight_layout(pad=0.20)
+    save_plot(plt, suffix='02')
+
+
 def entry_point():
     np.random.seed(0)
     x, y = read_data()
 
     hidden_layer_weights, output_layer_weights, losses = \
-        initialize_and_train_model(x, y, n_hidden=3)
+        initialize_and_train_model(x, y, n_hidden=3, num_epochs=1000)
 
     plot_losses(losses)
+    plot_predictions(x, y, hidden_layer_weights, output_layer_weights)
 
 
 if __name__ == "__main__":
