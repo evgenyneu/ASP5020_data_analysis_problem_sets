@@ -4,22 +4,25 @@ import matplotlib.pyplot as plt
 import os
 from matplotlib.ticker import MaxNLocator
 from matplotlib.colors import LinearSegmentedColormap, Normalize
-from plot_utils import save_plot, set_plot_style, MARKER_EDGE_WIDTH, MARKER_SIZE
+from plot_utils import save_plot, set_plot_style
+
+from q1_plot_data import plot_type, TYPE1_FACE_COLOR, TYPE2_FACE_COLOR, \
+                         TYPE1_EDGE_COLOR, TYPE2_EDGE_COLOR
 
 
-def read_data():
-    df = pd.read_csv('data/ps5_data.csv')
+def read_data(path_to_data):
+    df = pd.read_csv(path_to_data)
     x1 = df['x_1'].to_numpy().reshape((-1, 1))
     x2 = df['x_2'].to_numpy().reshape((-1, 1))
     x = np.hstack([x1, x2])
     y = df['classification'].to_numpy().reshape((-1, 1))
 
-    return (x, y)
+    return (x, y, df)
 
 
 def normalize(x):
     x_mean, x_std = (np.mean(x, axis=0), np.std(x, axis=0))
-    return (x - x_mean) / x_std
+    return (x - x_mean) / x_std, x_mean, x_std
 
 
 def sigmoid(x):
@@ -189,7 +192,7 @@ def initialize_and_train_model(X, y, n_hidden, num_epochs):
         The number of neurons in the hidden layer.
     """
 
-    x = normalize(X)
+    x, x_mean, x_std = normalize(X)
     n_observations = x.shape[0]
     n_inputs = x.shape[1]
     hidden_layer_inputs = make_input(x)
@@ -253,28 +256,13 @@ def train_model_or_get_weights_from_cache(x, y, n_hidden, num_epochs, cache_dir)
     return hidden_layer_weights, output_layer_weights, losses
 
 
-def entry_point():
-    np.random.seed(0)
-    x, y = read_data()
-
-    hidden_layer_weights, output_layer_weights, losses = \
-        train_model_or_get_weights_from_cache(
-            x=x, y=y, n_hidden=3, num_epochs=100000,
-            cache_dir='weights_cache')
-
-    plot_losses(losses)
-    plot_predictions(x, y, hidden_layer_weights, output_layer_weights)
-
-
-def plot_predictions(X, y, hidden_layer_weights, output_layer_weights):
-    x = normalize(X)
+def calc_prediction_mesh(X, y, hidden_layer_weights, output_layer_weights, mesh_size):
+    x, x_mean, x_std = normalize(X)
     x1_min, x2_min = x.min(axis=0)
     x1_max, x2_max = x.max(axis=0)
-    n_observations = 100
-    x1_grid = np.linspace(x1_min, x1_max, n_observations)
-    x2_grid = np.linspace(x2_min, x2_max, n_observations)
-
-    mesh = np.zeros([n_observations, n_observations])
+    x1_grid = np.linspace(x1_min, x1_max, mesh_size)
+    x2_grid = np.linspace(x2_min, x2_max, mesh_size)
+    prediction_mesh = np.zeros([mesh_size, mesh_size])
     x1_grid = x1_grid.reshape((-1, 1))
 
     for i, x2 in enumerate(x2_grid):
@@ -282,25 +270,58 @@ def plot_predictions(X, y, hidden_layer_weights, output_layer_weights):
         x_data = np.hstack([x1_grid, x2_single])
         hidden_layer_inputs = make_input(x_data)
 
-        y_pred, hidden_layer_outputs = calculate_model_output(
-            n_observations, hidden_layer_inputs,
+        y_pred, _ = calculate_model_output(
+            mesh_size, hidden_layer_inputs,
             hidden_layer_weights, output_layer_weights)
 
-        mesh[i, :] = y_pred[:, 0]
+        prediction_mesh[i, :] = y_pred[:, 0]
 
-    fig, ax = plt.subplots(figsize=(6, 6))
-    x1_mesh, x2_mesh = np.meshgrid(x1_grid, x2_grid)
+    x1_grid_denormilized = x1_grid * x_std[0] + x_mean[0]
+    x2_grid_denormilized = x2_grid * x_std[1] + x_mean[1]
+    x1_mesh, x2_mesh = np.meshgrid(x1_grid_denormilized, x2_grid_denormilized)
 
-    colors = ['#0060ff', '#ff0021']
+    return x1_mesh, x2_mesh, prediction_mesh
+
+
+def plot_observations(ax, df):
+    plot_type(ax, df, 0, marker='o', facecolor=TYPE1_FACE_COLOR, edgecolor=TYPE1_EDGE_COLOR)
+    plot_type(ax, df, 1, marker='^', facecolor=TYPE2_FACE_COLOR, edgecolor=TYPE2_EDGE_COLOR)
+
+def plot_predictions(X, y, df, hidden_layer_weights, output_layer_weights):
+    x, y, z = calc_prediction_mesh(
+        X=X,
+        y=y,
+        hidden_layer_weights=hidden_layer_weights,
+        output_layer_weights=output_layer_weights,
+        mesh_size=300
+    )
+
+    fig, ax = plt.subplots()
+    colors = [TYPE1_EDGE_COLOR, TYPE2_EDGE_COLOR]
     cm = LinearSegmentedColormap.from_list(
             "Custom", colors, N=20)
 
     norm = Normalize(vmin=0, vmax=1)
-    ax.pcolormesh(x1_mesh, x2_mesh, mesh, norm=norm, cmap=cm, shading='auto')
+    ax.pcolormesh(x, y, z, norm=norm, cmap=cm, shading='gouraud')
+    plot_observations(ax, df)
     fig.tight_layout(pad=0.20)
     save_plot(plt, suffix='02')
 
 
+def entry_point():
+    np.random.seed(0)
+    x, y, df = read_data('data/ps5_data.csv')
+
+    hidden_layer_weights, output_layer_weights, losses = \
+        train_model_or_get_weights_from_cache(
+            x=x, y=y, n_hidden=3, num_epochs=100000,
+            cache_dir='weights_cache')
+
+    plot_losses(losses)
+    plot_predictions(x, y, df, hidden_layer_weights, output_layer_weights)
+
+
 if __name__ == "__main__":
+    set_plot_style()
     entry_point()
     print('We are done')
