@@ -42,6 +42,17 @@ def plot_type(ax, df, type, marker, facecolor, edgecolor):
     )
 
 
+def set_plot_limits(ax, df, margin=0.05):
+    x = df['x_1']
+    y = df['x_2']
+
+    x_range = x.max() - x.min()
+    ax.set_xlim(x.min() - x_range * margin, x.max() + x_range * margin)
+
+    y_range = y.max() - y.min()
+    ax.set_ylim(y.min() - y_range * margin, y.max() + y_range * margin)
+
+
 def plot_data(path_to_data):
     """
     Reads CSV file and plots the data.
@@ -63,6 +74,7 @@ def plot_data(path_to_data):
     ax.set_xlabel(r'$x_1$')
     ax.grid(zorder=1)
     ax.set_ylabel(r'$x_2$')
+    set_plot_limits(ax, df)
     plt.subplots_adjust(left=0, right=1, top=1, bottom=0)
     fig.tight_layout(pad=0.20)
     save_plot(fig)

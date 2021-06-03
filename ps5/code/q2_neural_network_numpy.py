@@ -3,10 +3,12 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import os
 from matplotlib.ticker import MaxNLocator
-from matplotlib.colors import LinearSegmentedColormap, Normalize
+from matplotlib.colors import LinearSegmentedColormap, Normalize, ColorConverter
+import colorsys
 from plot_utils import save_plot, set_plot_style
 
-from q1_plot_data import plot_type, TYPE1_FACE_COLOR, TYPE2_FACE_COLOR, \
+from q1_plot_data import plot_type, set_plot_limits, \
+                         TYPE1_FACE_COLOR, TYPE2_FACE_COLOR, \
                          TYPE1_EDGE_COLOR, TYPE2_EDGE_COLOR
 
 
@@ -284,8 +286,19 @@ def calc_prediction_mesh(X, y, hidden_layer_weights, output_layer_weights, mesh_
 
 
 def plot_observations(ax, df):
-    plot_type(ax, df, 0, marker='o', facecolor=TYPE1_FACE_COLOR, edgecolor=TYPE1_EDGE_COLOR)
-    plot_type(ax, df, 1, marker='^', facecolor=TYPE2_FACE_COLOR, edgecolor=TYPE2_EDGE_COLOR)
+    edge = scale_lightness(TYPE1_EDGE_COLOR, 1.8)
+    plot_type(ax, df, 0, marker='o', facecolor=TYPE1_FACE_COLOR, edgecolor=edge)
+
+    edge = scale_lightness(TYPE2_EDGE_COLOR, 1.8)
+    plot_type(ax, df, 1, marker='^', facecolor=TYPE2_FACE_COLOR, edgecolor=edge)
+
+
+def scale_lightness(hex_color, scale_l):
+    """https://stackoverflow.com/a/60562502/297131"""
+    rgb = ColorConverter.to_rgb(hex_color)
+    h, l, s = colorsys.rgb_to_hls(*rgb)
+    return colorsys.hls_to_rgb(h, min(1, l * scale_l), s=s)
+
 
 def plot_predictions(X, y, df, hidden_layer_weights, output_layer_weights):
     x, y, z = calc_prediction_mesh(
@@ -297,14 +310,21 @@ def plot_predictions(X, y, df, hidden_layer_weights, output_layer_weights):
     )
 
     fig, ax = plt.subplots()
-    colors = [TYPE1_EDGE_COLOR, TYPE2_EDGE_COLOR]
+
+    colors = [
+        scale_lightness(TYPE1_EDGE_COLOR, 1),
+        scale_lightness(TYPE2_EDGE_COLOR, 1)
+    ]
+
     cm = LinearSegmentedColormap.from_list(
             "Custom", colors, N=20)
 
     norm = Normalize(vmin=0, vmax=1)
-    ax.pcolormesh(x, y, z, norm=norm, cmap=cm, shading='gouraud')
+    pcm = ax.pcolormesh(x, y, z, norm=norm, cmap=cm, shading='gouraud')
     plot_observations(ax, df)
-    fig.tight_layout(pad=0.20)
+    set_plot_limits(ax, df)
+    fig.colorbar(pcm, ax=ax, label='Classification')
+    fig.tight_layout(pad=0.30)
     save_plot(plt, suffix='02')
 
 
