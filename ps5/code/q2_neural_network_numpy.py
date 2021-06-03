@@ -2,6 +2,7 @@ import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 import os
+import math
 from matplotlib.ticker import MaxNLocator
 from matplotlib.colors import LinearSegmentedColormap, Normalize, ColorConverter
 import colorsys
@@ -50,27 +51,36 @@ def calculate_model_output(
     return output_layer_inputs @ output_layer_weights, hidden_layer_outputs
 
 
-def calculate_gradients(x, y, y_pred, hidden_layer_outputs,
+def calculate_gradients(x, y, y_pred, n_hidden, hidden_layer_outputs,
                         output_layer_weights, gradients):
-    w11 = output_layer_weights[1, 0]
-    w12 = output_layer_weights[2, 0]
-    w13 = output_layer_weights[3, 0]
-    beta_h = hidden_layer_outputs
 
     s = (y_pred - y)
-    gradients[12] = np.sum(s * beta_h[:, [2]])
-    gradients[11] = np.sum(s * beta_h[:, [1]])
-    gradients[10] = np.sum(s * beta_h[:, [0]])
-    gradients[9] = np.sum(s)
-    gradients[8] = np.sum(s * w13 * beta_h[:, [2]] * (1 - beta_h[:, [2]]) * x[:, [1]])
-    gradients[7] = np.sum(s * w12 * beta_h[:, [1]] * (1 - beta_h[:, [1]]) * x[:, [1]])
-    gradients[6] = np.sum(s * w11 * beta_h[:, [0]] * (1 - beta_h[:, [0]]) * x[:, [1]])
-    gradients[5] = np.sum(s * w13 * beta_h[:, [2]] * (1 - beta_h[:, [2]]) * x[:, [0]])
-    gradients[4] = np.sum(s * w12 * beta_h[:, [1]] * (1 - beta_h[:, [1]]) * x[:, [0]])
-    gradients[3] = np.sum(s * w11 * beta_h[:, [0]] * (1 - beta_h[:, [0]]) * x[:, [0]])
-    gradients[2] = np.sum(s * w13 * beta_h[:, [2]] * (1 - beta_h[:, [2]]))
-    gradients[1] = np.sum(s * w12 * beta_h[:, [1]] * (1 - beta_h[:, [1]]))
-    gradients[0] = np.sum(s * w11 * beta_h[:, [0]] * (1 - beta_h[:, [0]]))
+    n_inputs = x.shape[1]
+    n_input_weights = (n_inputs + 1) * n_hidden
+
+    # Input layer weights
+    for i in range(n_input_weights):
+        i_hidden = i % n_hidden  # Index of hidden neuron (not including bias)
+        outer_weight = output_layer_weights[i_hidden + 1, 0]
+        hidden_output = hidden_layer_outputs[:, [i_hidden]]
+        weights = s * outer_weight * hidden_output * (1 - hidden_output)
+
+        # Index of input neuron: -1 is bias, 0 is first input, 1 is second etc.
+        i_input = int(math.floor((i - n_hidden) / n_hidden))
+
+        if i_input >= 0:  # for non-bias node
+            weights *= x[:, [i_input]]
+
+        gradients[i] = np.sum(weights)
+
+    # Hidden layer weights
+    for i in range(len(output_layer_weights)):
+        weight = s
+
+        if i > 0:  # for non-bias node
+            weight = s * hidden_layer_outputs[:, [i - 1]]
+
+        gradients[n_input_weights + i] = np.sum(weight)
 
 
 def update_weights(gradients, eta, hidden_layer_weights, output_layer_weights):
@@ -140,7 +150,8 @@ def generate_weights(n_inputs, n_hidden):
     return reshape_weights(hidden_weights, output_weights, n_inputs, n_hidden)
 
 
-def train_model(x, y, num_epochs, n_observations, hidden_layer_inputs,
+def train_model(x, y, num_epochs, n_observations, n_hidden,
+                hidden_layer_inputs,
                 hidden_layer_weights, output_layer_weights):
 
     save_nth_loss = 100
@@ -153,8 +164,14 @@ def train_model(x, y, num_epochs, n_observations, hidden_layer_inputs,
             n_observations, hidden_layer_inputs,
             hidden_layer_weights, output_layer_weights)
 
-        calculate_gradients(x, y, y_pred, hidden_layer_outputs,
-                            output_layer_weights, gradients)
+        calculate_gradients(
+            x=x,
+            y=y,
+            y_pred=y_pred,
+            n_hidden=n_hidden,
+            hidden_layer_outputs=hidden_layer_outputs,
+            output_layer_weights=output_layer_weights,
+            gradients=gradients)
 
         update_weights(gradients, 1e-3, hidden_layer_weights,
                        output_layer_weights)
@@ -204,7 +221,9 @@ def initialize_and_train_model(X, y, n_hidden, num_epochs):
     )
 
     losses = train_model(
-        x=x, y=y, num_epochs=num_epochs, n_observations=n_observations,
+        x=x, y=y, num_epochs=num_epochs,
+        n_observations=n_observations,
+        n_hidden=n_hidden,
         hidden_layer_inputs=hidden_layer_inputs,
         hidden_layer_weights=hidden_layer_weights,
         output_layer_weights=output_layer_weights
@@ -245,8 +264,8 @@ def train_model_or_get_weights_from_cache(x, y, n_hidden, num_epochs, cache_dir)
     hidden_layer_weights, output_layer_weights, losses = \
         load_weights_from_cache(dir)
 
-    if hidden_layer_weights is not None:
-        return hidden_layer_weights, output_layer_weights, losses
+    # if hidden_layer_weights is not None:
+    #     return hidden_layer_weights, output_layer_weights, losses
 
     hidden_layer_weights, output_layer_weights, losses = \
         initialize_and_train_model(x, y, n_hidden=n_hidden,
@@ -346,7 +365,7 @@ def entry_point():
 
     hidden_layer_weights, output_layer_weights, losses = \
         train_model_or_get_weights_from_cache(
-            x=x, y=y, n_hidden=3, num_epochs=100000,
+            x=x, y=y, n_hidden=3, num_epochs=10000,
             cache_dir='weights_cache')
 
     plot_losses(losses)
