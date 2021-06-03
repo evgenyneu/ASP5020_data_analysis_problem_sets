@@ -3,7 +3,6 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import os
 import math
-from matplotlib.ticker import MaxNLocator
 from matplotlib.colors import LinearSegmentedColormap, Normalize, ColorConverter
 import colorsys
 from plot_utils import save_plot, set_plot_style
@@ -150,12 +149,14 @@ def generate_weights(n_inputs, n_hidden):
 
 def train_model(x, y, num_epochs, n_observations, n_hidden,
                 hidden_layer_inputs,
-                hidden_layer_weights, output_layer_weights):
+                hidden_layer_weights, output_layer_weights, skip_epochs):
 
-    save_nth_loss = 100
-    losses = np.empty(int(num_epochs / save_nth_loss))
+    losses = np.empty(int(num_epochs / skip_epochs))
     n_out = 0
-    gradients = np.empty(13)
+    n_inputs = x.shape[1]
+    n_weights = (n_inputs + 1) * n_hidden + n_hidden + 1
+    print(n_weights)
+    gradients = np.empty(n_weights)
 
     for epoch in range(num_epochs):
         y_pred, hidden_layer_outputs = calculate_model_output(
@@ -181,7 +182,7 @@ def train_model(x, y, num_epochs, n_observations, n_hidden,
         # Calculate our loss function
         loss = loss_function(y, y_pred)
 
-        if not epoch % save_nth_loss:
+        if not epoch % skip_epochs:
             print(epoch, loss)
             losses[n_out] = loss
             n_out += 1
@@ -189,20 +190,18 @@ def train_model(x, y, num_epochs, n_observations, n_hidden,
     return losses
 
 
-def plot_losses(losses):
-    fig, ax = plt.subplots(figsize=(6, 6))
+def plot_losses(losses, skip_epochs):
+    fig, ax = plt.subplots()
     ax.plot(losses, zorder=2, color='#ff0021')
-    ax.set_xlabel('Epoch')
+    ax.set_xlabel(f"Epoch (x{skip_epochs})")
     ax.set_ylabel('Loss')
     ax.set_ylim([0, 10])
-    ax.xaxis.set_major_locator(MaxNLocator(6))
-    ax.yaxis.set_major_locator(MaxNLocator(6))
     ax.grid(zorder=1)
     fig.tight_layout(pad=0.20)
     save_plot(plt, suffix='01')
 
 
-def initialize_and_train_model(X, y, n_hidden, num_epochs):
+def initialize_and_train_model(X, y, n_hidden, num_epochs, skip_epochs):
     """
     Parameters
     ----------
@@ -213,7 +212,7 @@ def initialize_and_train_model(X, y, n_hidden, num_epochs):
         The number of neurons in the hidden layer.
     """
 
-    x, x_mean, x_std = normalize(X)
+    x, _, _ = normalize(X)
     n_observations = x.shape[0]
     n_inputs = x.shape[1]
     hidden_layer_inputs = make_input(x)
@@ -228,7 +227,8 @@ def initialize_and_train_model(X, y, n_hidden, num_epochs):
         n_hidden=n_hidden,
         hidden_layer_inputs=hidden_layer_inputs,
         hidden_layer_weights=hidden_layer_weights,
-        output_layer_weights=output_layer_weights
+        output_layer_weights=output_layer_weights,
+        skip_epochs=skip_epochs
     )
 
     return hidden_layer_weights, output_layer_weights, losses
@@ -259,19 +259,22 @@ def load_weights_from_cache(cache_dir):
         return None, None, None
 
 
-def train_model_or_get_weights_from_cache(x, y, n_hidden, num_epochs, cache_dir):
+def train_model_or_get_weights_from_cache(
+        x, y, n_hidden, num_epochs, cache_dir, skip_epochs):
+
     this_dir = os.path.dirname(os.path.realpath(__file__))
     dir = os.path.join(this_dir, cache_dir)
 
     hidden_layer_weights, output_layer_weights, losses = \
         load_weights_from_cache(dir)
 
-    # if hidden_layer_weights is not None:
-    #     return hidden_layer_weights, output_layer_weights, losses
+    if hidden_layer_weights is not None:
+        return hidden_layer_weights, output_layer_weights, losses
 
     hidden_layer_weights, output_layer_weights, losses = \
         initialize_and_train_model(x, y, n_hidden=n_hidden,
-                                   num_epochs=num_epochs)
+                                   num_epochs=num_epochs,
+                                   skip_epochs=skip_epochs)
 
     save_weights_to_cache(cache_dir, hidden_layer_weights,
                           output_layer_weights, losses)
@@ -364,13 +367,14 @@ def plot_predictions(X, y, df, hidden_layer_weights, output_layer_weights):
 def entry_point():
     np.random.seed(0)
     x, y, df = read_data('data/ps5_data.csv')
+    skip_epochs = 100
 
     hidden_layer_weights, output_layer_weights, losses = \
         train_model_or_get_weights_from_cache(
-            x=x, y=y, n_hidden=3, num_epochs=100000,
+            x=x, y=y, n_hidden=3, num_epochs=100000, skip_epochs=skip_epochs,
             cache_dir='weights_cache')
 
-    plot_losses(losses)
+    plot_losses(losses, skip_epochs)
     plot_predictions(x, y, df, hidden_layer_weights, output_layer_weights)
 
 
