@@ -1,6 +1,7 @@
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
+import os
 from matplotlib.ticker import MaxNLocator
 import matplotlib.cm as cm
 from plot_utils import save_plot, set_plot_style, MARKER_EDGE_WIDTH, MARKER_SIZE
@@ -137,7 +138,9 @@ def generate_weights(n_inputs, n_hidden):
 def train_model(x, y, num_epochs, n_observations, hidden_layer_inputs,
                 hidden_layer_weights, output_layer_weights):
 
-    losses = np.empty(num_epochs)
+    save_nth_loss = 100
+    losses = np.empty(int(num_epochs / save_nth_loss))
+    n_out = 0
     gradients = np.empty(13)
 
     for epoch in range(num_epochs):
@@ -154,10 +157,10 @@ def train_model(x, y, num_epochs, n_observations, hidden_layer_inputs,
         # Calculate our loss function
         loss = loss_function(y, y_pred)
 
-        if not epoch % 100:
+        if not epoch % save_nth_loss:
             print(epoch, loss)
-
-        losses[epoch] = loss
+            losses[n_out] = loss
+            n_out += 1
 
     return losses
 
@@ -209,7 +212,7 @@ def plot_predictions(X, y, hidden_layer_weights, output_layer_weights):
     x = normalize(X)
     x1_min, x2_min = x.min(axis=0)
     x1_max, x2_max = x.max(axis=0)
-    n_observations = 10
+    n_observations = 100
     x1_grid = np.linspace(x1_min, x1_max, n_observations)
     x2_grid = np.linspace(x2_min, x2_max, n_observations)
 
@@ -225,7 +228,7 @@ def plot_predictions(X, y, hidden_layer_weights, output_layer_weights):
             n_observations, hidden_layer_inputs,
             hidden_layer_weights, output_layer_weights)
 
-        mesh[:, i] = y_pred[:, 0]
+        mesh[i, :] = y_pred[:, 0]
 
     fig, ax = plt.subplots(figsize=(6, 6))
     x1_mesh, x2_mesh = np.meshgrid(x1_grid, x2_grid)
@@ -234,12 +237,59 @@ def plot_predictions(X, y, hidden_layer_weights, output_layer_weights):
     save_plot(plt, suffix='02')
 
 
+def save_weights_to_cache(cache_dir, hidden_layer_weights,
+                          output_layer_weights, losses):
+
+    os.makedirs(cache_dir, exist_ok=True)
+
+    path = os.path.join(cache_dir, 'hidden_layer_weights')
+    np.save(path, hidden_layer_weights)
+
+    path = os.path.join(cache_dir, 'output_layer_weights')
+    np.save(path, output_layer_weights)
+
+    path = os.path.join(cache_dir, 'losses')
+    np.save(path, losses)
+
+
+def load_weights_from_cache(cache_dir):
+    try:
+        hidden_layer_weights = np.load(os.path.join(cache_dir, 'hidden_layer_weights.npy'))
+        output_layer_weights = np.load(os.path.join(cache_dir, 'output_layer_weights.npy'))
+        losses = np.load(os.path.join(cache_dir, 'losses.npy'))
+        return hidden_layer_weights, output_layer_weights, losses
+    except IOError:
+        return None, None, None
+
+
+def train_model_or_get_weights_from_cache(x, y, n_hidden, num_epochs, cache_dir):
+    this_dir = os.path.dirname(os.path.realpath(__file__))
+    dir = os.path.join(this_dir, cache_dir)
+
+    hidden_layer_weights, output_layer_weights, losses = \
+        load_weights_from_cache(dir)
+
+    if hidden_layer_weights is not None:
+        return hidden_layer_weights, output_layer_weights, losses
+
+    hidden_layer_weights, output_layer_weights, losses = \
+        initialize_and_train_model(x, y, n_hidden=n_hidden,
+                                   num_epochs=num_epochs)
+
+    save_weights_to_cache(cache_dir, hidden_layer_weights,
+                          output_layer_weights, losses)
+
+    return hidden_layer_weights, output_layer_weights, losses
+
+
 def entry_point():
     np.random.seed(0)
     x, y = read_data()
 
     hidden_layer_weights, output_layer_weights, losses = \
-        initialize_and_train_model(x, y, n_hidden=3, num_epochs=1000)
+        train_model_or_get_weights_from_cache(
+            x=x, y=y, n_hidden=3, num_epochs=100000,
+            cache_dir='weights_cache')
 
     plot_losses(losses)
     plot_predictions(x, y, hidden_layer_weights, output_layer_weights)
