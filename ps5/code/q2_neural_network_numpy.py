@@ -355,9 +355,11 @@ def plot_predictions(X, y, df, hidden_layer_weights, output_layer_weights):
     cm = LinearSegmentedColormap.from_list(
             "Custom", colors, N=20)
 
-    norm = Normalize(vmin=0, vmax=1)
-    pcm = ax.pcolormesh(x, y, z, norm=norm, cmap=cm, shading='gouraud')
+    z = np.clip(z, 0, 1)  # consider values > 1 to be 1 and those < 0 to be 0
+    pcm = ax.pcolormesh(x, y, z, cmap=cm, shading='gouraud')
     plot_observations(ax, df)
+    ax.set_xlabel(r'$x_1$')
+    ax.set_ylabel(r'$x_2$')
     set_plot_limits(ax, df, padding=axis_padding)
     fig.colorbar(pcm, ax=ax, label='Predicted classification')
     fig.tight_layout(pad=0.30)
