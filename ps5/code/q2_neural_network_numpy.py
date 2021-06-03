@@ -83,20 +83,18 @@ def calculate_gradients(x, y, y_pred, n_hidden, hidden_layer_outputs,
         gradients[n_input_weights + i] = np.sum(weight)
 
 
-def update_weights(gradients, eta, hidden_layer_weights, output_layer_weights):
-    hidden_layer_weights[0, 0] -= eta * gradients[0]   # w1
-    hidden_layer_weights[0, 1] -= eta * gradients[1]   # w2
-    hidden_layer_weights[0, 2] -= eta * gradients[2]   # w3
-    hidden_layer_weights[1, 0] -= eta * gradients[3]   # w4
-    hidden_layer_weights[1, 1] -= eta * gradients[4]   # w5
-    hidden_layer_weights[1, 2] -= eta * gradients[5]   # w6
-    hidden_layer_weights[2, 0] -= eta * gradients[6]   # w7
-    hidden_layer_weights[2, 1] -= eta * gradients[7]   # w8
-    hidden_layer_weights[2, 2] -= eta * gradients[8]   # w9
-    output_layer_weights[0, 0] -= eta * gradients[9]   # w10
-    output_layer_weights[1, 0] -= eta * gradients[10]  # w11
-    output_layer_weights[2, 0] -= eta * gradients[11]  # w12
-    output_layer_weights[3, 0] -= eta * gradients[12]  # w13
+def update_weights(n_inputs, n_hidden, gradients, eta, hidden_layer_weights, \
+                   output_layer_weights):
+
+    n_input_weights = (n_inputs + 1) * n_hidden
+
+    # Input layer weights
+    scaled = eta * gradients[:n_input_weights].reshape(n_inputs + 1, n_hidden)
+    hidden_layer_weights -= scaled
+
+    # Hidden layer weights
+    scaled = eta * gradients[n_input_weights:].reshape(n_hidden + 1, 1)
+    output_layer_weights -= scaled
 
 
 def loss_function(y, y_pred):
@@ -173,8 +171,12 @@ def train_model(x, y, num_epochs, n_observations, n_hidden,
             output_layer_weights=output_layer_weights,
             gradients=gradients)
 
-        update_weights(gradients, 1e-3, hidden_layer_weights,
-                       output_layer_weights)
+        update_weights(n_inputs=x.shape[1],
+                       n_hidden=n_hidden,
+                       gradients=gradients,
+                       eta=1e-3,
+                       hidden_layer_weights=hidden_layer_weights,
+                       output_layer_weights=output_layer_weights)
 
         # Calculate our loss function
         loss = loss_function(y, y_pred)
@@ -365,7 +367,7 @@ def entry_point():
 
     hidden_layer_weights, output_layer_weights, losses = \
         train_model_or_get_weights_from_cache(
-            x=x, y=y, n_hidden=3, num_epochs=10000,
+            x=x, y=y, n_hidden=3, num_epochs=100000,
             cache_dir='weights_cache')
 
     plot_losses(losses)
