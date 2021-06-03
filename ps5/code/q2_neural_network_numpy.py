@@ -258,10 +258,19 @@ def train_model_or_get_weights_from_cache(x, y, n_hidden, num_epochs, cache_dir)
     return hidden_layer_weights, output_layer_weights, losses
 
 
-def calc_prediction_mesh(X, y, hidden_layer_weights, output_layer_weights, mesh_size):
+def calc_prediction_mesh(X, y, hidden_layer_weights, output_layer_weights, mesh_size, padding):
     x, x_mean, x_std = normalize(X)
     x1_min, x2_min = x.min(axis=0)
     x1_max, x2_max = x.max(axis=0)
+
+    # Add padding
+    x1_range = x1_max - x1_min
+    x1_min -= x1_range * padding
+    x1_max += x1_range * padding
+    x2_range = x2_max - x2_min
+    x2_min -= x2_range * padding
+    x2_max += x2_range * padding
+
     x1_grid = np.linspace(x1_min, x1_max, mesh_size)
     x2_grid = np.linspace(x2_min, x2_max, mesh_size)
     prediction_mesh = np.zeros([mesh_size, mesh_size])
@@ -286,10 +295,10 @@ def calc_prediction_mesh(X, y, hidden_layer_weights, output_layer_weights, mesh_
 
 
 def plot_observations(ax, df):
-    edge = scale_lightness(TYPE1_EDGE_COLOR, 1.8)
+    edge = scale_lightness(TYPE1_EDGE_COLOR, 1.7)
     plot_type(ax, df, 0, marker='o', facecolor=TYPE1_FACE_COLOR, edgecolor=edge)
 
-    edge = scale_lightness(TYPE2_EDGE_COLOR, 1.8)
+    edge = scale_lightness(TYPE2_EDGE_COLOR, 1.7)
     plot_type(ax, df, 1, marker='^', facecolor=TYPE2_FACE_COLOR, edgecolor=edge)
 
 
@@ -301,12 +310,15 @@ def scale_lightness(hex_color, scale_l):
 
 
 def plot_predictions(X, y, df, hidden_layer_weights, output_layer_weights):
+    axis_padding = 0.05
+
     x, y, z = calc_prediction_mesh(
         X=X,
         y=y,
         hidden_layer_weights=hidden_layer_weights,
         output_layer_weights=output_layer_weights,
-        mesh_size=300
+        mesh_size=300,
+        padding=axis_padding
     )
 
     fig, ax = plt.subplots()
@@ -322,8 +334,8 @@ def plot_predictions(X, y, df, hidden_layer_weights, output_layer_weights):
     norm = Normalize(vmin=0, vmax=1)
     pcm = ax.pcolormesh(x, y, z, norm=norm, cmap=cm, shading='gouraud')
     plot_observations(ax, df)
-    set_plot_limits(ax, df)
-    fig.colorbar(pcm, ax=ax, label='Classification')
+    set_plot_limits(ax, df, padding=axis_padding)
+    fig.colorbar(pcm, ax=ax, label='Predicted classification')
     fig.tight_layout(pad=0.30)
     save_plot(plt, suffix='02')
 

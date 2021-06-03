@@ -7,7 +7,6 @@ TYPE1_EDGE_COLOR = '#0060ff'
 TYPE2_FACE_COLOR = '#febcc4aa'
 TYPE2_EDGE_COLOR = '#ff0021'
 
-
 def plot_type(ax, df, type, marker, facecolor, edgecolor):
     """
     Plots an observation type from the data.
@@ -42,15 +41,15 @@ def plot_type(ax, df, type, marker, facecolor, edgecolor):
     )
 
 
-def set_plot_limits(ax, df, margin=0.05):
+def set_plot_limits(ax, df, padding):
     x = df['x_1']
     y = df['x_2']
 
     x_range = x.max() - x.min()
-    ax.set_xlim(x.min() - x_range * margin, x.max() + x_range * margin)
+    ax.set_xlim(x.min() - x_range * padding, x.max() + x_range * padding)
 
     y_range = y.max() - y.min()
-    ax.set_ylim(y.min() - y_range * margin, y.max() + y_range * margin)
+    ax.set_ylim(y.min() - y_range * padding, y.max() + y_range * padding)
 
 
 def plot_data(path_to_data):
@@ -74,7 +73,7 @@ def plot_data(path_to_data):
     ax.set_xlabel(r'$x_1$')
     ax.grid(zorder=1)
     ax.set_ylabel(r'$x_2$')
-    set_plot_limits(ax, df)
+    set_plot_limits(ax, df, padding=0.05)
     plt.subplots_adjust(left=0, right=1, top=1, bottom=0)
     fig.tight_layout(pad=0.20)
     save_plot(fig)
