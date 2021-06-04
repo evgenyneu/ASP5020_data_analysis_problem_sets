@@ -44,8 +44,14 @@ def gradient(p, x, y, n_inputs, n_hidden):
 
     gradients = np.empty(len(p))
 
-    calculate_gradients(x, y, y_pred, hidden_layer_outputs,
-                        output_layer_weights, gradients)
+    calculate_gradients(
+        x=x,
+        y=y,
+        n_hidden=n_hidden,
+        y_pred=y_pred,
+        hidden_layer_outputs=hidden_layer_outputs,
+        output_layer_weights=output_layer_weights,
+        gradients=gradients)
 
     return gradients
 

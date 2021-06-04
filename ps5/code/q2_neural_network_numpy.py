@@ -1,9 +1,117 @@
+"""
+A neural network with a single layer that is trained to classify
+the data. Plots the data, the loss function and the model predictions.
+
+Based heavily on code provided in Andy Casey's lecture notes:
+http://astrowizici.st/teaching/phs5000/13/
+
+
+How to run
+----------
+
+See README.md
+
+Common variables used in code below
+===================================
+
+
+inputs_with_bias
+---------------
+
+N by M + 1 numpy.ndarray 2D array.
+Input layer values that include the bias 1 and input variables
+for all observations, where
+    N is the number of observations,
+    M is the number of input variables.
+
+Example:
+
+For two variables x1 and x2, this array looks like:
+[
+    [1  x1 x2],
+    [1  x1 x2],
+    [1  x1 x2]
+    ...
+    [1  x1 x2]
+].
+
+
+hidden_layer_weights
+--------------------
+
+M + 1 by H numpy.ndarray 2D array.
+Weights for connections coming from the input into the hidden layer,
+where
+    M is the number of input variables,
+    H is the number nodes in the hidden layer (excluding the bias).
+
+Example:
+
+For two input variables and three hidden nodes:
+[
+    [w1,  w2,  w3],
+    [w4,  w5,  w6],
+    [w7,  w8,  w9]
+].
+Here weights w1, w2 and w3 are for connections coming from input layer bias,
+w4, 25 and w6 for first input x1 and w7, w8 and w9 are for the second input.
+
+
+output_layer_weights
+--------------------
+
+H + 1 by 1 numpy.ndarray 2D array,
+Weights for connections coming from the hidden layer into the output node,
+where
+    H is the number nodes in the hidden layer (excluding the bias).
+
+Example:
+
+For a hidden layer with three nodes:
+[
+    [w10],
+    [w11],
+    [w12],
+    [w13]
+],
+where w10 is for connection coming from hidden layer bias, and w11, w12, w13
+are for three nodes in the hidden layer.
+
+
+y_pred
+------
+
+N by 1 numpy.ndarray 2D array.
+Contains model predictions for N observations.
+
+
+hidden_layer_outputs
+--------------------
+
+N by H numpy.ndarray 2D array.
+Outputs coming from the nodes of the hidden layer.
+where
+    N is the number of observations,
+    H is the number nodes in the hidden layer (excluding the bias)
+
+Example:
+
+For three nodes with outputs h1, h2, h3 in the hidden layer:
+[
+    [h1, h2, h3],
+    [h1, h2, h3],
+    [h1, h2, h3],
+    ...
+    [h1, h2, h3]
+].
+"""
+
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 import os
 import math
-from matplotlib.colors import LinearSegmentedColormap, Normalize, ColorConverter
+from matplotlib.colors import LinearSegmentedColormap, ColorConverter
 import colorsys
 from plot_utils import save_plot, set_plot_style
 
@@ -13,6 +121,30 @@ from q1_plot_data import plot_type, set_plot_limits, \
 
 
 def read_data(path_to_data):
+    """
+    Reads the observation data.
+
+    Parameters
+    ----------
+    path_to_data: str
+        Path to CSV file containing the data.
+
+    Returns
+    --------
+
+    (x, y, df): tuple
+        x: n by m numpy.ndarray 2D array
+            Input data values, where
+                n is the number of observations,
+                m is the number of input variables.
+
+        y: n by 1 numpy.ndarray 2D array
+            Classification values for n observations that will be validated
+            agains in our model.
+        df: Pandas' DataFrame
+            The dataframe the CSV files was read into.
+    """
+
     df = pd.read_csv(path_to_data)
     x1 = df['x_1'].to_numpy().reshape((-1, 1))
     x2 = df['x_2'].to_numpy().reshape((-1, 1))
@@ -23,23 +155,70 @@ def read_data(path_to_data):
 
 
 def normalize(x):
+    """
+    Transforms the input values so they have zero mean and
+    standard deviation of 1.
+
+    Parameters
+    ----------
+    x: N by M numpy.ndarray 2D array
+        Input data values, where
+            N is the number of observations,
+            M is the number of input variables.
+
+    Returns
+    -------
+    numpy.ndarray 2D array
+        Transformed values in the same format as the input.
+    """
+
     x_mean, x_std = (np.mean(x, axis=0), np.std(x, axis=0))
     return (x - x_mean) / x_std, x_mean, x_std
 
 
 def sigmoid(x):
     """
-    Returns the value of the sigmoid function.
+    Calculates the value of the sigmoid function.
+
+    Parameters
+    ----------
+    x: float or numpy.ndarray
+        Argument(s) of the sigmoid function.
+
+    Returns
+    -------
+    float or numpy.ndarray
+        Output of the sigmoid function.
     """
 
     return 1 / (1 + np.exp(-x))
 
 
 def calculate_model_output(
-        n_observations, hidden_layer_inputs, hidden_layer_weights,
+        n_observations, inputs_with_bias, hidden_layer_weights,
         output_layer_weights):
+    """
+    Calculates the output value of the neural network given the
+    input and weights.
 
-    hidden_layer_sums = hidden_layer_inputs @ hidden_layer_weights
+    Parameters
+    ----------
+
+    n_observations: int
+        Number of observations.
+
+    inputs_with_bias, hidden_layer_weights, output_layer_weights:
+        See docs at the top of this file.
+
+    Returns
+    -------
+
+    (y_pred, hidden_layer_outputs): tuple
+        See docs at the top of this file.
+
+    """
+
+    hidden_layer_sums = inputs_with_bias @ hidden_layer_weights
     hidden_layer_outputs = sigmoid(hidden_layer_sums)
 
     output_layer_inputs = np.hstack([
@@ -47,7 +226,9 @@ def calculate_model_output(
         hidden_layer_outputs
     ])
 
-    return output_layer_inputs @ output_layer_weights, hidden_layer_outputs
+    output = output_layer_inputs @ output_layer_weights
+
+    return output, hidden_layer_outputs
 
 
 def calculate_gradients(x, y, y_pred, n_hidden, hidden_layer_outputs,
@@ -148,19 +329,18 @@ def generate_weights(n_inputs, n_hidden):
 
 
 def train_model(x, y, num_epochs, n_observations, n_hidden,
-                hidden_layer_inputs,
+                inputs_with_bias,
                 hidden_layer_weights, output_layer_weights, skip_epochs):
 
     losses = np.empty(int(num_epochs / skip_epochs))
     n_out = 0
     n_inputs = x.shape[1]
     n_weights = (n_inputs + 1) * n_hidden + n_hidden + 1
-    print(n_weights)
     gradients = np.empty(n_weights)
 
     for epoch in range(num_epochs):
         y_pred, hidden_layer_outputs = calculate_model_output(
-            n_observations, hidden_layer_inputs,
+            n_observations, inputs_with_bias,
             hidden_layer_weights, output_layer_weights)
 
         calculate_gradients(
@@ -215,7 +395,7 @@ def initialize_and_train_model(X, y, n_hidden, num_epochs, skip_epochs):
     x, _, _ = normalize(X)
     n_observations = x.shape[0]
     n_inputs = x.shape[1]
-    hidden_layer_inputs = make_input(x)
+    inputs_with_bias = make_input(x)
 
     hidden_layer_weights, output_layer_weights = generate_weights(
         n_inputs, n_hidden
@@ -225,7 +405,7 @@ def initialize_and_train_model(X, y, n_hidden, num_epochs, skip_epochs):
         x=x, y=y, num_epochs=num_epochs,
         n_observations=n_observations,
         n_hidden=n_hidden,
-        hidden_layer_inputs=hidden_layer_inputs,
+        inputs_with_bias=inputs_with_bias,
         hidden_layer_weights=hidden_layer_weights,
         output_layer_weights=output_layer_weights,
         skip_epochs=skip_epochs
@@ -268,8 +448,8 @@ def train_model_or_get_weights_from_cache(
     hidden_layer_weights, output_layer_weights, losses = \
         load_weights_from_cache(dir)
 
-    if hidden_layer_weights is not None:
-        return hidden_layer_weights, output_layer_weights, losses
+    # if hidden_layer_weights is not None:
+    #     return hidden_layer_weights, output_layer_weights, losses
 
     hidden_layer_weights, output_layer_weights, losses = \
         initialize_and_train_model(x, y, n_hidden=n_hidden,
@@ -303,10 +483,10 @@ def calc_prediction_mesh(X, y, hidden_layer_weights, output_layer_weights, mesh_
     for i, x2 in enumerate(x2_grid):
         x2_single = np.array([x2] * len(x2_grid)).reshape((-1, 1))
         x_data = np.hstack([x1_grid, x2_single])
-        hidden_layer_inputs = make_input(x_data)
+        inputs_with_bias = make_input(x_data)
 
         y_pred, _ = calculate_model_output(
-            mesh_size, hidden_layer_inputs,
+            mesh_size, inputs_with_bias,
             hidden_layer_weights, output_layer_weights)
 
         prediction_mesh[i, :] = y_pred[:, 0]
@@ -369,15 +549,15 @@ def plot_predictions(X, y, df, hidden_layer_weights, output_layer_weights):
 def entry_point():
     np.random.seed(0)
     x, y, df = read_data('data/ps5_data.csv')
-    skip_epochs = 100
+    skip_epochs = 10
 
     hidden_layer_weights, output_layer_weights, losses = \
         train_model_or_get_weights_from_cache(
-            x=x, y=y, n_hidden=3, num_epochs=100000, skip_epochs=skip_epochs,
+            x=x, y=y, n_hidden=3, num_epochs=10, skip_epochs=skip_epochs,
             cache_dir='weights_cache')
 
     plot_losses(losses, skip_epochs)
-    plot_predictions(x, y, df, hidden_layer_weights, output_layer_weights)
+    # plot_predictions(x, y, df, hidden_layer_weights, output_layer_weights)
 
 
 if __name__ == "__main__":
