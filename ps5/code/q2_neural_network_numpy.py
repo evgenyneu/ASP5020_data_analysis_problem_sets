@@ -494,8 +494,8 @@ def train_model_or_get_weights_from_cache(
     hidden_layer_weights, output_layer_weights, losses = \
         load_weights_from_cache(dir)
 
-    # if hidden_layer_weights is not None:
-    #     return hidden_layer_weights, output_layer_weights, losses
+    if hidden_layer_weights is not None:
+        return hidden_layer_weights, output_layer_weights, losses
 
     hidden_layer_weights, output_layer_weights, losses = \
         initialize_and_train_model(x, y, n_hidden=n_hidden,
@@ -510,6 +510,34 @@ def train_model_or_get_weights_from_cache(
 
 def calc_prediction_mesh(X, y, hidden_layer_weights, output_layer_weights,
                          mesh_size, padding):
+    """
+    Calculates the data arrays (2d arrays called mesh) for predictions plot.
+
+    Parameters
+    ----------
+
+    mesh_size: int
+        The size of each of the two dimensions of the returned mesh arrays
+
+    padding: int
+        The proportion of the input range to be added to the left
+        and right so that the inputs are not shown at the very
+        edges of the plot.
+
+    other parameters:
+        See q2_variables.md.
+
+    Returns
+    -------
+    (x1_mesh, x2_mesh, prediction_mesh): tuple of numpy.ndarray square 2D array
+        x1_mesh, x2_mesh:
+            The mash arrays containing the x1 and x2 values
+            similar to the input data.
+
+        prediction_mesh:
+            Contains model prediction.
+    """
+
     x, x_mean, x_std = normalize(X)
     x1_min, x2_min = x.min(axis=0)
     x1_max, x2_max = x.max(axis=0)
@@ -546,6 +574,17 @@ def calc_prediction_mesh(X, y, hidden_layer_weights, output_layer_weights,
 
 
 def plot_observations(ax, df):
+    """
+    Adds observations to the plot.
+
+    Parameters
+    ----------
+
+    ax: Matplotlib's axis
+
+    df: Pandas' data frame.
+        Contains input data.
+    """
     edge = scale_lightness(TYPE1_EDGE_COLOR, 1.7)
     plot_type(ax, df, 0, marker='o', facecolor=TYPE1_FACE_COLOR, edgecolor=edge)
 
@@ -554,13 +593,41 @@ def plot_observations(ax, df):
 
 
 def scale_lightness(hex_color, scale_l):
-    """https://stackoverflow.com/a/60562502/297131"""
+    """
+    Changes the brightness of the given color by the given factor `scale_l`.
+
+    Parameters
+    ----------
+
+    hex_color: str
+        Color in hex formar. Example: '#ff0000' for red.
+
+    scale_l: float
+        Scale factor by which to change the brightness. Value of 1 corresponds
+        to no change.
+
+    Source: https://stackoverflow.com/a/60562502/297131
+    """
+
     rgb = ColorConverter.to_rgb(hex_color)
     h, l, s = colorsys.rgb_to_hls(*rgb)
     return colorsys.hls_to_rgb(h, min(1, l * scale_l), s=s)
 
 
 def plot_predictions(X, y, df, hidden_layer_weights, output_layer_weights):
+    """
+    Plot the prediction of the model along with the input data.
+    The plot is stored in a file.
+
+    Parameters
+    ----------
+
+    df: Pandas' data frame.
+        Contains input data.
+
+    other parameters:
+        See q2_variables.md.
+    """
     axis_padding = 0.05
 
     x, y, z = calc_prediction_mesh(
@@ -594,17 +661,22 @@ def plot_predictions(X, y, df, hidden_layer_weights, output_layer_weights):
 
 
 def entry_point():
+    """
+    Ready? Go!
+    The entry point of the program.
+    """
+
     np.random.seed(0)
     x, y, df = read_data('data/ps5_data.csv')
-    skip_epochs = 10
+    skip_epochs = 100
 
     hidden_layer_weights, output_layer_weights, losses = \
         train_model_or_get_weights_from_cache(
-            x=x, y=y, n_hidden=3, num_epochs=10, skip_epochs=skip_epochs,
+            x=x, y=y, n_hidden=3, num_epochs=100000, skip_epochs=skip_epochs,
             cache_dir='weights_cache')
 
     plot_losses(losses, skip_epochs)
-    # plot_predictions(x, y, df, hidden_layer_weights, output_layer_weights)
+    plot_predictions(x, y, df, hidden_layer_weights, output_layer_weights)
 
 
 if __name__ == "__main__":
