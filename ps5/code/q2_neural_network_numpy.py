@@ -10,165 +10,6 @@ How to run
 ----------
 
 See README.md
-
-
-Common variables used in code below
-===================================
-
-hidden_layer_weights
---------------------
-
-M + 1 by H numpy.ndarray 2D array.
-Weights for connections coming from the input into the hidden layer,
-where
-    M is the number of input variables,
-    H is the number nodes in the hidden layer (excluding the bias).
-
-Example:
-
-For two input variables and three hidden nodes:
-[
-    [w1,  w2,  w3],
-    [w4,  w5,  w6],
-    [w7,  w8,  w9]
-].
-Here weights w1, w2 and w3 are for connections coming from input layer bias,
-w4, 25 and w6 for first input x1 and w7, w8 and w9 are for the second input.
-
-
-inputs_with_bias
----------------
-
-N by M + 1 numpy.ndarray 2D array.
-Input layer values that include the bias 1 and input variables
-for all observations, where
-    N is the number of observations,
-    M is the number of input variables.
-
-Example:
-
-For two variables x1 and x2, this array looks like:
-[
-    [1  x1 x2],
-    [1  x1 x2],
-    [1  x1 x2]
-    ...
-    [1  x1 x2]
-].
-
-
-n_inputs
---------
-
-int
-Number of input variables.
-
-
-n_hidden
---------
-
-int
-Number of nodes in the hidden layer (excluding the bias node).
-
-
-n_observations
---------------
-
-int
-Number of observations.
-
-
-output_layer_weights
---------------------
-
-H + 1 by 1 numpy.ndarray 2D array,
-Weights for connections coming from the hidden layer into the output node,
-where
-    H is the number nodes in the hidden layer (excluding the bias).
-
-Example:
-
-For a hidden layer with three nodes:
-[
-    [w10],
-    [w11],
-    [w12],
-    [w13]
-],
-where w10 is for connection coming from hidden layer bias, and w11, w12, w13
-are for three nodes in the hidden layer.
-
-
-
-gradients
---------
-
-numpy.ndarray 1D array.
-Contains the list of gradients for all weights.
-
-Example:
-
-For network with two inputs and three nodes in the hidden layer:
-
-[g1, g2, g3, g4, g5, g6, .... g13],
-
-where g1, g2, g3 are gradients for the weights for connections coming from
-the bias in the input layer, g4, g5, g6 are for first input node etc.
-
-
-hidden_layer_outputs
---------------------
-
-N by H numpy.ndarray 2D array.
-Outputs coming from the nodes of the hidden layer.
-where
-    N is the number of observations,
-    H is the number nodes in the hidden layer (excluding the bias)
-
-Example:
-
-For three nodes with outputs h1, h2, h3 in the hidden layer:
-[
-    [h1, h2, h3],
-    [h1, h2, h3],
-    [h1, h2, h3],
-    ...
-    [h1, h2, h3]
-].
-
-
-x
----
-
-N by M numpy.ndarray 2D array
-Input data values, where
-    N is the number of observations,
-    M is the number of input variables.
-
-Example:
-
-For two inputs x1 and x2:
-[
-    [x1, x2]
-    [x1, x2]
-    [x1, x2]
-    ...
-    [x1, x2]
-]
-
-
-y
-------
-
-N by 1 numpy.ndarray 2D array.
-Contains output data values for N observations.
-
-
-y_pred
-------
-
-N by 1 numpy.ndarray 2D array.
-Contains model predictions for N observations.
 """
 
 import numpy as np
@@ -198,16 +39,11 @@ def read_data(path_to_data):
     --------
 
     (x, y, df): tuple
-        x: n by m numpy.ndarray 2D array
-            Input data values, where
-                n is the number of observations,
-                m is the number of input variables.
-
-        y: n by 1 numpy.ndarray 2D array
-            Classification values for n observations that will be validated
-            agains in our model.
         df: Pandas' DataFrame
             The dataframe the CSV files was read into.
+
+        x, y: See q2_variables.md.
+
     """
 
     df = pd.read_csv(path_to_data)
@@ -226,7 +62,7 @@ def normalize(x):
 
     Parameters
     ----------
-    x: See docs at the top of this file.
+    x: See q2_variables.md.
 
     Returns
     -------
@@ -266,13 +102,13 @@ def calculate_model_output(
     Parameters
     ----------
 
-    See docs at the top of this file.
+    See q2_variables.md.
 
     Returns
     -------
 
     (y_pred, hidden_layer_outputs): tuple
-        See docs at the top of this file.
+        See q2_variables.md.
 
     """
 
@@ -300,7 +136,7 @@ def calculate_gradients(x, y, y_pred, n_hidden, hidden_layer_outputs,
     Parameters
     -----------
 
-    See docs at the top of this file.
+    See q2_variables.md.
     """
 
     s = (y_pred - y)
@@ -344,7 +180,7 @@ def update_weights(n_inputs, n_hidden, gradients, eta, hidden_layer_weights, \
     eta: int
         Learning rate, a small value like 0.001.
 
-    See docs at the top of this file.
+    See q2_variables.md.
     """
 
     n_input_weights = (n_inputs + 1) * n_hidden
@@ -365,14 +201,14 @@ def loss_function(y, y_pred):
     Parameters
     -----------
 
-    See docs at the top of this file.
+    See q2_variables.md.
 
 
     Returns
     -------
 
     float
-    Value of the loss function.
+        Value of the loss function.
     """
 
     return 0.5 * np.sum((y_pred - y)**2)
@@ -380,15 +216,18 @@ def loss_function(y, y_pred):
 
 def make_input(x):
     """
-    Given the observations `x`, appends the biases and returns
-    [
-        [x1, x2, 1],
-        [x1, x2, 1],
-        [x1, x2, 1],
-        [x1, x2, 1]
-        ...
-        ...
-    ]
+    Prepends column of 1's (the biases) to the model inputs.
+
+    Parameters
+    -----------
+
+    x: See q2_variables.md.
+
+    Returns
+    -------
+
+    inputs_with_bias:
+        See q2_variables.md.
     """
     n_observations = x.shape[0]
 
@@ -399,27 +238,48 @@ def make_input(x):
 
 
 def reshape_weights(hidden_weights, output_weights, n_inputs, n_hidden):
-    # Make the following inner weights for the inner layer (for 3 hidden neurons):
-    # [
-    #     [w1,  w2,  w3],
-    #     [w4,  w5,  w6],
-    #     [w7,  w8,  w9]
-    # ]
+    """
+    Given 1D arrays containing weights, return the weights in the specific
+    shapes that are useful for faster calculations.
+
+    Parameters
+    ----------
+
+    hidden_weights, output_weights: numpy.ndarray 1D array containing
+        weights for connections coming into the hidden and output layers
+        respsectively.
+
+    n_inputs, n_hidden:
+        See q2_variables.md.
+
+    Returns
+    -------
+
+    (hidden_layer_weights, output_layer_weights): tuple
+        See q2_variables.md.
+    """
+
     hidden_layer_weights = hidden_weights.reshape(n_inputs + 1, n_hidden)
-
-    # Outer layer weights:
-    # [
-    #     [w10],
-    #     [w11],
-    #     [w12],
-    #     [w13]
-    # ]
     output_layer_weights = output_weights.reshape(n_hidden + 1, 1)
-
     return hidden_layer_weights, output_layer_weights
 
 
 def generate_weights(n_inputs, n_hidden):
+    """
+    Generate weights by darawing random numbers from a unit normal distribution.
+
+    Parameters
+    ----------
+
+    See q2_variables.md.
+
+    Returns
+    -------
+
+    (hidden_layer_weights, output_layer_weights): tuple
+        See q2_variables.md.
+    """
+
     hidden_weights = np.random.randn((n_inputs + 1) * n_hidden)
     output_weights = np.random.randn(n_hidden + 1)
     return reshape_weights(hidden_weights, output_weights, n_inputs, n_hidden)
@@ -428,6 +288,31 @@ def generate_weights(n_inputs, n_hidden):
 def train_model(x, y, num_epochs, n_observations, n_hidden,
                 inputs_with_bias,
                 hidden_layer_weights, output_layer_weights, skip_epochs):
+    """
+    Train the model by iterating `num_epochs` number of times and updating
+    the model weights through backpropagation.
+
+    Parameters
+    ----------
+
+    num_epochs: int
+        Number of times to update the model weights thorugh backpropagation.
+
+    skip_epochs: int
+        Number of epochs to skip in the train loop before storing the
+        value of the loss function in the returned loss array
+        (so we don't output all losses, as the array will be too large).
+
+    other parameters:
+        See q2_variables.md.
+
+
+    Returns
+    -------
+
+    losses:
+        See q2_variables.md.
+    """
 
     losses = np.empty(int(num_epochs / skip_epochs))
     n_out = 0
@@ -456,10 +341,10 @@ def train_model(x, y, num_epochs, n_observations, n_hidden,
                        hidden_layer_weights=hidden_layer_weights,
                        output_layer_weights=output_layer_weights)
 
-        # Calculate our loss function
-        loss = loss_function(y, y_pred)
-
         if not epoch % skip_epochs:
+            # Calculate loss function
+            loss = loss_function(y, y_pred)
+            # print and store
             print(epoch, loss)
             losses[n_out] = loss
             n_out += 1
@@ -468,6 +353,16 @@ def train_model(x, y, num_epochs, n_observations, n_hidden,
 
 
 def plot_losses(losses, skip_epochs):
+    """
+    Plots the values of the loss function over iterations (epochs).
+    The plot is saved to a file.
+
+    Parameters
+    ----------
+
+    skip_epochs: int
+        Number of epochs skipped before storing the loss during model training.
+    """
     fig, ax = plt.subplots()
     ax.plot(losses, zorder=2, color='#ff0021')
     ax.set_xlabel(f"Epoch (x{skip_epochs})")
@@ -480,13 +375,30 @@ def plot_losses(losses, skip_epochs):
 
 def initialize_and_train_model(X, y, n_hidden, num_epochs, skip_epochs):
     """
+    Initializes the model weights and runs the model training given the
+    input data.
+
     Parameters
     ----------
     X, y : 2D array
         Input data, not-normalized
 
-    n_hidden: int
-        The number of neurons in the hidden layer.
+    num_epochs: int
+        Number of times to update the model weights thorugh backpropagation.
+
+    skip_epochs: int
+        Number of epochs to skip in the train loop before storing the
+        value of the loss function in the returned loss array
+        (so we don't output all losses, as the array will be too large).
+
+    other parameters:
+        See q2_variables.md.
+
+    Returns
+    -------
+
+    (hidden_layer_weights, output_layer_weights, losses):
+        See q2_variables.md.
     """
 
     x, _, _ = normalize(X)
@@ -513,6 +425,19 @@ def initialize_and_train_model(X, y, n_hidden, num_epochs, skip_epochs):
 
 def save_weights_to_cache(cache_dir, hidden_layer_weights,
                           output_layer_weights, losses):
+    """
+    Stores the arrays containing weights to files, so that we don't
+    need to train the model if they exist.
+
+    Parameters
+    ----------
+
+    cache_dir: str
+        Path to the directory where the files with weights will be created.
+
+    other parameters:
+        See q2_variables.md.
+    """
 
     os.makedirs(cache_dir, exist_ok=True)
 
@@ -527,6 +452,15 @@ def save_weights_to_cache(cache_dir, hidden_layer_weights,
 
 
 def load_weights_from_cache(cache_dir):
+    """
+    Loads weights and values of the loss function for the model from local
+    files, if they exist.
+
+    Returns
+    -------
+    (hidden_layer_weights, output_layer_weights, losses): tuple
+        See q2_variables.md.
+    """
     try:
         hidden_layer_weights = np.load(os.path.join(cache_dir, 'hidden_layer_weights.npy'))
         output_layer_weights = np.load(os.path.join(cache_dir, 'output_layer_weights.npy'))
@@ -538,6 +472,21 @@ def load_weights_from_cache(cache_dir):
 
 def train_model_or_get_weights_from_cache(
         x, y, n_hidden, num_epochs, cache_dir, skip_epochs):
+    """
+    Initializes and trains the model. If model has already been trained
+    and the weight files are stored in local files, then return the
+    weights from cache instead.
+
+    Parameters
+    ----------
+
+    See q2_variables.md.
+
+    Returns
+    -------
+    (hidden_layer_weights, output_layer_weights, losses): tuple
+        See q2_variables.md.
+    """
 
     this_dir = os.path.dirname(os.path.realpath(__file__))
     dir = os.path.join(this_dir, cache_dir)
@@ -559,7 +508,8 @@ def train_model_or_get_weights_from_cache(
     return hidden_layer_weights, output_layer_weights, losses
 
 
-def calc_prediction_mesh(X, y, hidden_layer_weights, output_layer_weights, mesh_size, padding):
+def calc_prediction_mesh(X, y, hidden_layer_weights, output_layer_weights,
+                         mesh_size, padding):
     x, x_mean, x_std = normalize(X)
     x1_min, x2_min = x.min(axis=0)
     x1_max, x2_max = x.max(axis=0)

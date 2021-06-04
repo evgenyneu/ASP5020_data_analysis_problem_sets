@@ -42,6 +42,21 @@ def plot_type(ax, df, type, marker, facecolor, edgecolor):
 
 
 def set_plot_limits(ax, df, padding):
+    """
+    Sets the plot axis limit.
+
+    Parameters
+    ---------
+
+    ax: Matplotib's plot axis.
+
+    df: Panda's data frame containing the data for plotting.
+
+    padding: float
+        The proportion of the input range to be added to the left
+        and right so that the inputs are not shown at the very
+        edges of the plot.
+    """
     x = df['x_1']
     y = df['x_2']
 
