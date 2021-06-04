@@ -20,6 +20,7 @@ import math
 from matplotlib.colors import LinearSegmentedColormap, ColorConverter
 import colorsys
 from plot_utils import save_plot, set_plot_style
+from make_movie_from_images import make_movie_from_images
 
 from q1_plot_data import plot_type, set_plot_limits, \
                          TYPE1_FACE_COLOR, TYPE2_FACE_COLOR, \
@@ -285,9 +286,10 @@ def generate_weights(n_inputs, n_hidden):
     return reshape_weights(hidden_weights, output_weights, n_inputs, n_hidden)
 
 
-def train_model(x, y, num_epochs, n_observations, n_hidden,
+def train_model(X, x, y, df, num_epochs, n_observations, n_hidden,
                 inputs_with_bias,
-                hidden_layer_weights, output_layer_weights, skip_epochs):
+                hidden_layer_weights, output_layer_weights, skip_epochs,
+                predictions_plots_dir):
     """
     Train the model by iterating `num_epochs` number of times and updating
     the model weights through backpropagation.
@@ -341,13 +343,23 @@ def train_model(x, y, num_epochs, n_observations, n_hidden,
                        hidden_layer_weights=hidden_layer_weights,
                        output_layer_weights=output_layer_weights)
 
-        if not epoch % skip_epochs:
+        if epoch % skip_epochs == 0:
             # Calculate loss function
             loss = loss_function(y, y_pred)
+
             # print and store
             print(epoch, loss)
             losses[n_out] = loss
             n_out += 1
+
+            plot_predictions(
+                X, y, df, hidden_layer_weights,
+                output_layer_weights,
+                predictions_plot_mesh_size=300,
+                epoch=epoch,
+                image_format='png',
+                plot_dir=predictions_plots_dir
+            )
 
     return losses
 
@@ -373,7 +385,8 @@ def plot_losses(losses, skip_epochs):
     save_plot(plt, suffix='01')
 
 
-def initialize_and_train_model(X, y, n_hidden, num_epochs, skip_epochs):
+def initialize_and_train_model(X, y, df, n_hidden, num_epochs, skip_epochs,
+                               predictions_plots_dir):
     """
     Initializes the model weights and runs the model training given the
     input data.
@@ -390,6 +403,9 @@ def initialize_and_train_model(X, y, n_hidden, num_epochs, skip_epochs):
         Number of epochs to skip in the train loop before storing the
         value of the loss function in the returned loss array
         (so we don't output all losses, as the array will be too large).
+
+    predictions_plots_dir: str
+        Disrectory where prediction plots are saved.
 
     other parameters:
         See q2_variables.md.
@@ -411,13 +427,14 @@ def initialize_and_train_model(X, y, n_hidden, num_epochs, skip_epochs):
     )
 
     losses = train_model(
-        x=x, y=y, num_epochs=num_epochs,
+        X=X, x=x, y=y, df=df, num_epochs=num_epochs,
         n_observations=n_observations,
         n_hidden=n_hidden,
         inputs_with_bias=inputs_with_bias,
         hidden_layer_weights=hidden_layer_weights,
         output_layer_weights=output_layer_weights,
-        skip_epochs=skip_epochs
+        skip_epochs=skip_epochs,
+        predictions_plots_dir=predictions_plots_dir
     )
 
     return hidden_layer_weights, output_layer_weights, losses
@@ -471,7 +488,8 @@ def load_weights_from_cache(cache_dir):
 
 
 def train_model_or_get_weights_from_cache(
-        x, y, n_hidden, num_epochs, cache_dir, skip_epochs):
+        X, y, df, n_hidden, num_epochs, cache_dir,
+        skip_epochs, predictions_plots_dir):
     """
     Initializes and trains the model. If model has already been trained
     and the weight files are stored in local files, then return the
@@ -480,7 +498,11 @@ def train_model_or_get_weights_from_cache(
     Parameters
     ----------
 
-    See q2_variables.md.
+    predictions_plots_dir: str
+        Directory where prediction plots are saved.
+
+    other parameters:
+        See q2_variables.md.
 
     Returns
     -------
@@ -498,9 +520,12 @@ def train_model_or_get_weights_from_cache(
         return hidden_layer_weights, output_layer_weights, losses
 
     hidden_layer_weights, output_layer_weights, losses = \
-        initialize_and_train_model(x, y, n_hidden=n_hidden,
+        initialize_and_train_model(X, y,
+                                   df=df,
+                                   n_hidden=n_hidden,
                                    num_epochs=num_epochs,
-                                   skip_epochs=skip_epochs)
+                                   skip_epochs=skip_epochs,
+                                   predictions_plots_dir=predictions_plots_dir)
 
     save_weights_to_cache(cache_dir, hidden_layer_weights,
                           output_layer_weights, losses)
@@ -614,7 +639,9 @@ def scale_lightness(hex_color, scale_l):
     return colorsys.hls_to_rgb(h, min(1, l * scale_l), s=s)
 
 
-def plot_predictions(X, y, df, hidden_layer_weights, output_layer_weights):
+def plot_predictions(X, y, df, hidden_layer_weights, output_layer_weights,
+                     predictions_plot_mesh_size,
+                     epoch, plot_dir, image_format, show_epoch=True):
     """
     Plot the prediction of the model along with the input data.
     The plot is stored in a file.
@@ -625,8 +652,21 @@ def plot_predictions(X, y, df, hidden_layer_weights, output_layer_weights):
     df: Pandas' data frame.
         Contains input data.
 
+    epoch: int
+        The epoch index.
+
+    plot_dir: str
+        Dir where the plot is saved.
+
+    image_format: str
+        Format of the plot image: png, pdf, jpg.
+
+    show_epoch: bool
+        If True an epoch number is shown on the plot.
+
     other parameters:
         See q2_variables.md.
+
     """
     axis_padding = 0.05
 
@@ -635,7 +675,7 @@ def plot_predictions(X, y, df, hidden_layer_weights, output_layer_weights):
         y=y,
         hidden_layer_weights=hidden_layer_weights,
         output_layer_weights=output_layer_weights,
-        mesh_size=300,
+        mesh_size=predictions_plot_mesh_size,
         padding=axis_padding
     )
 
@@ -650,14 +690,30 @@ def plot_predictions(X, y, df, hidden_layer_weights, output_layer_weights):
             "Custom", colors, N=20)
 
     z = np.clip(z, 0, 1)  # consider values > 1 to be 1 and those < 0 to be 0
-    pcm = ax.pcolormesh(x, y, z, cmap=cm, shading='gouraud')
+    pcm = ax.pcolormesh(x, y, z, cmap=cm, shading='gouraud', vmin=0, vmax=1)
     plot_observations(ax, df)
     ax.set_xlabel(r'$x_1$')
     ax.set_ylabel(r'$x_2$')
     set_plot_limits(ax, df, padding=axis_padding)
+
     fig.colorbar(pcm, ax=ax, label='Predicted classification')
+
+    # Show epoch number
+    if show_epoch:
+        ax.text(
+            0.02, 0.04,
+            f'{epoch:05d}',
+            horizontalalignment='left',
+            verticalalignment='center',
+            transform=ax.transAxes,
+            zorder=6,
+            fontsize=11,
+            bbox=dict(facecolor='white', alpha=0.8, edgecolor='0.7'))
+
     fig.tight_layout(pad=0.30)
-    save_plot(plt, suffix='02')
+    save_plot(plt, extensions=[image_format], subdir=plot_dir, suffix=f"02_{epoch:05d}")
+    fig.clear()
+    plt.close()
 
 
 def entry_point():
@@ -667,16 +723,31 @@ def entry_point():
     """
 
     np.random.seed(0)
-    x, y, df = read_data('data/ps5_data.csv')
+    X, y, df = read_data('data/ps5_data.csv')
     skip_epochs = 100
+    num_epochs = 30000
+    plot_frames_dir = 'q2_movie_frames'
 
     hidden_layer_weights, output_layer_weights, losses = \
         train_model_or_get_weights_from_cache(
-            x=x, y=y, n_hidden=3, num_epochs=100000, skip_epochs=skip_epochs,
-            cache_dir='weights_cache')
+            X=X, y=y, df=df,
+            n_hidden=3, num_epochs=num_epochs, skip_epochs=skip_epochs,
+            cache_dir='weights_cache',
+            predictions_plots_dir=plot_frames_dir)
 
     plot_losses(losses, skip_epochs)
-    plot_predictions(x, y, df, hidden_layer_weights, output_layer_weights)
+
+    plot_predictions(X, y, df, hidden_layer_weights, output_layer_weights,
+                     predictions_plot_mesh_size=300,
+                     epoch=int(num_epochs/skip_epochs),
+                     plot_dir='plots', image_format='pdf', show_epoch=False)
+
+    make_movie_from_images(
+        plot_dir=plot_frames_dir,
+        movie_dir='plots',
+        movie_name='q2_predictions.mp4',
+        frame_rate=30
+    )
 
 
 if __name__ == "__main__":

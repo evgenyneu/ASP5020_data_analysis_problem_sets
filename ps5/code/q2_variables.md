@@ -150,6 +150,10 @@ For two inputs x1 and x2:
 ]
 ```
 
+## X
+
+Same as x but original, not normalized inputs.
+
 
 ## y
 
