@@ -108,4 +108,6 @@ def save_plot(plt, suffix=None, extensions=['pdf'], subdir='plots', dpi=300,
         figure_path = os.path.join(plot_dir, filename)
         plt.savefig(figure_path, dpi=dpi)
         printed_path = os.path.join(subdir, filename)
-        print(f"Figure saved to {printed_path}")
+
+        if not silent:
+            print(f"Figure saved to {printed_path}")

@@ -1,7 +1,7 @@
 import numpy as np
 import torch
 from plot_utils import save_plot, set_plot_style
-from q2_neural_network_numpy import read_data, normalize
+from q2_neural_network_numpy import read_data, normalize, plot_losses
 
 
 def entry_point():
@@ -30,21 +30,23 @@ def entry_point():
     loss_fn = torch.nn.MSELoss(reduction='sum')
 
     epochs = 3000
+    skip_epochs = 100
     learning_rate = 1e-3
     losses = np.empty(epochs)
     optimizer = torch.optim.SGD(model.parameters(), lr=learning_rate)
 
     for t in range(epochs):
-        y_pred = model(x)
+        y_pred = model(x)  # Calculate model predictions
         loss = loss_fn(y_pred, y)
         losses[t] = loss.item()
+        optimizer.zero_grad()
+        loss.backward()  # Calculate the gradients
+        optimizer.step()  # Update the weights
 
-        if t % 100 == 0:
+         if t % skip_epochs == 0:
             print(t, loss.item())
 
-        optimizer.zero_grad()
-        loss.backward()
-        optimizer.step()
+    plot_losses(losses, skip_epochs, suffix='pytorch')
 
 
 if __name__ == "__main__":

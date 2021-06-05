@@ -366,7 +366,7 @@ def train_model(X, x, y, df, num_epochs, n_observations, n_hidden,
     return losses
 
 
-def plot_losses(losses, skip_epochs):
+def plot_losses(losses, skip_epochs, ylim=[0, 10], suffix=None):
     """
     Plots the values of the loss function over iterations (epochs).
     The plot is saved to a file.
@@ -376,15 +376,21 @@ def plot_losses(losses, skip_epochs):
 
     skip_epochs: int
         Number of epochs skipped before storing the loss during model training.
+
+    ylim: list
+        Y axis limits.
+
+    suffix: str
+        Text added to the end of the plot file name.
     """
     fig, ax = plt.subplots()
     ax.plot(losses, zorder=2, color='#ff0021')
     ax.set_xlabel(f"Epoch (x{skip_epochs})")
     ax.set_ylabel('Loss')
-    ax.set_ylim([0, 10])
+    ax.set_ylim(ylim)
     ax.grid(zorder=1)
     fig.tight_layout(pad=0.20)
-    save_plot(plt, suffix='01')
+    save_plot(plt, suffix=suffix)
 
 
 def initialize_and_train_model(X, y, df, n_hidden, num_epochs, skip_epochs,
