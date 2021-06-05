@@ -169,8 +169,8 @@ def calculate_gradients(x, y, y_pred, n_hidden, hidden_layer_outputs,
         gradients[n_input_weights + i] = np.sum(weight)
 
 
-def update_weights(n_inputs, n_hidden, gradients, eta, hidden_layer_weights, \
-                   output_layer_weights):
+def update_weights(n_inputs, n_hidden, gradients, learning_rate, \
+                   hidden_layer_weights, output_layer_weights):
     """
     Update the `hidden_layer_weights` and `output_layer_weights` weights,
     given the `gradients`.
@@ -178,7 +178,7 @@ def update_weights(n_inputs, n_hidden, gradients, eta, hidden_layer_weights, \
     Parameters
     -----------
 
-    eta: int
+    learning_rate: int
         Learning rate, a small value like 0.001.
 
     See q2_variables.md.
@@ -187,11 +187,13 @@ def update_weights(n_inputs, n_hidden, gradients, eta, hidden_layer_weights, \
     n_input_weights = (n_inputs + 1) * n_hidden
 
     # Input layer weights
-    scaled = eta * gradients[:n_input_weights].reshape(n_inputs + 1, n_hidden)
+    scaled = learning_rate * gradients[:n_input_weights].reshape(
+        n_inputs + 1, n_hidden)
+
     hidden_layer_weights -= scaled
 
     # Hidden layer weights
-    scaled = eta * gradients[n_input_weights:].reshape(n_hidden + 1, 1)
+    scaled = learning_rate * gradients[n_input_weights:].reshape(n_hidden + 1, 1)
     output_layer_weights -= scaled
 
 
@@ -339,7 +341,7 @@ def train_model(X, x, y, df, num_epochs, n_observations, n_hidden,
         update_weights(n_inputs=x.shape[1],
                        n_hidden=n_hidden,
                        gradients=gradients,
-                       eta=1e-3,
+                       learning_rate=1e-3,
                        hidden_layer_weights=hidden_layer_weights,
                        output_layer_weights=output_layer_weights)
 
