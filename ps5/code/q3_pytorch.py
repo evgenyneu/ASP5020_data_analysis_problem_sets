@@ -24,40 +24,27 @@ def entry_point():
     model = torch.nn.Sequential(
         torch.nn.Linear(n_inputs, n_hidden),
         torch.nn.Sigmoid(),
-        torch.nn.Linear(n_hidden, 1),
+        torch.nn.Linear(n_hidden, 1)
     )
 
     loss_fn = torch.nn.MSELoss(reduction='sum')
 
-    epochs = 30000
+    epochs = 3000
     learning_rate = 1e-3
-
     losses = np.empty(epochs)
+    optimizer = torch.optim.SGD(model.parameters(), lr=learning_rate)
 
     for t in range(epochs):
-        # Forward pass.
         y_pred = model(x)
-
-        # Compute loss.
         loss = loss_fn(y_pred, y)
-
-        if t % 100 == 99:
-            print(t, loss.item())
-
         losses[t] = loss.item()
 
-        # Zero the gradients before running the backward pass.
-        model.zero_grad()
+        if t % 100 == 0:
+            print(t, loss.item())
 
-        # Backward pass.
+        optimizer.zero_grad()
         loss.backward()
-
-        # Update the weights using gradient descent.
-        with torch.no_grad():
-            for param in model.parameters():
-                param -= learning_rate * param.grad
-
-
+        optimizer.step()
 
 
 if __name__ == "__main__":
