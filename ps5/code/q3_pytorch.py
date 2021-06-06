@@ -16,8 +16,21 @@ See README.md
 import numpy as np
 import torch
 from plot_utils import save_plot, set_plot_style
-from q2_neural_network_numpy import read_data, normalize, plot_losses
 
+from q2_neural_network_numpy import (
+    read_data, normalize, plot_losses, plot_predictions,
+    make_movie_from_images
+)
+
+
+def calculate_model_output(x, model):
+    with torch.no_grad():
+        x = torch.tensor(x, dtype=torch.float32)
+        return model(x)
+
+
+def train_model_if_not_trained():
+    pass
 
 def entry_point():
     """
@@ -28,6 +41,7 @@ def entry_point():
     np.random.seed(0)
     torch.manual_seed(0)
     plot_dir = 'plots/q3'
+    plot_frames_dir = 'plots/q3/movie_frames'
 
     X, y, df = read_data('data/ps5_data.csv')
     x, _, _ = normalize(X)
@@ -48,6 +62,7 @@ def entry_point():
     loss_fn = torch.nn.MSELoss(reduction='sum')
     num_epochs = 3000
     skip_epochs = 100
+    predictions_plot_mesh_size = 300
     learning_rate = 1e-3
     losses = np.empty(int(num_epochs / skip_epochs))
     optimizer = torch.optim.SGD(model.parameters(), lr=learning_rate)
@@ -66,21 +81,26 @@ def entry_point():
             n_out += 1
 
             plot_predictions(
-                X, y, df,
+                X, df,
                 mesh_size=predictions_plot_mesh_size,
                 epoch=epoch,
                 image_format='png',
-                plot_dir=predictions_plots_dir,
-                run_model_func=calculate_model_output_from_original_data,
+                plot_dir=plot_frames_dir,
+                run_model_func=calculate_model_output,
                 run_model_args={
-                    "n_observations": predictions_plot_mesh_size,
-                    "hidden_layer_weights": hidden_layer_weights,
-                    "output_layer_weights": output_layer_weights
+                    "model": model,
                 },
                 show_epoch=True
             )
 
     plot_losses(losses, skip_epochs, plot_dir=plot_dir)
+
+    make_movie_from_images(
+        plot_dir=plot_frames_dir,
+        movie_dir=plot_dir,
+        movie_name='predictions.mp4',
+        frame_rate=30
+    )
 
 
 if __name__ == "__main__":

@@ -1,6 +1,6 @@
 """Create mp4 movie from images"""
 
-from shutil import copyfile
+from shutil import move
 import os
 import subprocess
 
@@ -53,6 +53,6 @@ def make_movie_from_images(plot_dir, movie_dir, movie_name, frame_rate):
     if os.path.exists(dest_movie):
         os.remove(dest_movie)
 
-    copyfile(src_movie, dest_movie)
+    move(src_movie, dest_movie)
 
     print(f"Movie saved to: {dest_movie}")

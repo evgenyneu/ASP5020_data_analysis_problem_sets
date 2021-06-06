@@ -80,6 +80,10 @@ For two variables x1 and x2, this array looks like:
 ].
 ```
 
+## learning_rate
+
+int
+Learning rate, a small value like 0.001.
 
 ## losses
 

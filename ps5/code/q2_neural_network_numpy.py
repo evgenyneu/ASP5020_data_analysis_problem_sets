@@ -196,9 +196,6 @@ def update_weights(n_inputs, n_hidden, gradients, learning_rate, \
     Parameters
     -----------
 
-    learning_rate: int
-        Learning rate, a small value like 0.001.
-
     See q2_variables.md.
     """
 
@@ -311,6 +308,7 @@ def generate_weights(n_inputs, n_hidden):
 def train_model(X, x, y, df, num_epochs, n_observations, n_hidden,
                 inputs_with_bias,
                 hidden_layer_weights, output_layer_weights, skip_epochs,
+                learning_rate,
                 predictions_plots_dir,
                 predictions_plot_mesh_size):
     """
@@ -365,7 +363,7 @@ def train_model(X, x, y, df, num_epochs, n_observations, n_hidden,
         update_weights(n_inputs=x.shape[1],
                        n_hidden=n_hidden,
                        gradients=gradients,
-                       learning_rate=1e-3,
+                       learning_rate=learning_rate,
                        hidden_layer_weights=hidden_layer_weights,
                        output_layer_weights=output_layer_weights)
 
@@ -420,9 +418,10 @@ def plot_losses(losses, skip_epochs, plot_dir, ylim=[0, 20]):
     save_plot(plt, file_name='loss', subdir=plot_dir)
 
 
-def initialize_and_train_model(X, y, df, n_hidden, num_epochs, skip_epochs,
-                               predictions_plots_dir,
-                               predictions_plot_mesh_size):
+def initialize_and_train_model(
+    X, y, df, n_hidden, num_epochs, skip_epochs,
+    learning_rate, predictions_plots_dir,
+    predictions_plot_mesh_size):
     """
     Initializes the model weights and runs the model training given the
     input data.
@@ -466,6 +465,7 @@ def initialize_and_train_model(X, y, df, n_hidden, num_epochs, skip_epochs,
         X=X, x=x, y=y, df=df, num_epochs=num_epochs,
         n_observations=n_observations,
         n_hidden=n_hidden,
+        learning_rate=learning_rate,
         inputs_with_bias=inputs_with_bias,
         hidden_layer_weights=hidden_layer_weights,
         output_layer_weights=output_layer_weights,
@@ -526,6 +526,7 @@ def load_weights_from_cache(cache_dir):
 
 def train_model_or_get_weights_from_cache(
         X, y, df, n_hidden, num_epochs, cache_dir,
+        learning_rate,
         skip_epochs, predictions_plots_dir, predictions_plot_mesh_size):
     """
     Initializes and trains the model. If model has already been trained
@@ -561,6 +562,7 @@ def train_model_or_get_weights_from_cache(
             X, y,
             df=df,
             n_hidden=n_hidden,
+            learning_rate=learning_rate,
             num_epochs=num_epochs,
             skip_epochs=skip_epochs,
             predictions_plots_dir=predictions_plots_dir,
@@ -781,7 +783,7 @@ def entry_point():
     np.random.seed(0)
     X, y, df = read_data('data/ps5_data.csv')
     skip_epochs = 100
-    num_epochs = 3000
+    num_epochs = 300
     plot_frames_dir = 'plots/q2/movie_frames'
     plot_dir = 'plots/q2'
     predictions_plot_mesh_size = 300
@@ -790,7 +792,8 @@ def entry_point():
         train_model_or_get_weights_from_cache(
             X=X, y=y, df=df,
             n_hidden=3, num_epochs=num_epochs, skip_epochs=skip_epochs,
-            cache_dir='weights_cache',
+            learning_rate=1e-3,
+            cache_dir='model_cache/q2',
             predictions_plots_dir=plot_frames_dir,
             predictions_plot_mesh_size=predictions_plot_mesh_size
         )

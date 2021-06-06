@@ -1,4 +1,4 @@
 __pycache__
 plots
 .ipynb_checkpoints
-weights_cache
+model_cache
