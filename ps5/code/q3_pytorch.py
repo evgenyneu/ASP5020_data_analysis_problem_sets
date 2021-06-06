@@ -29,41 +29,14 @@ def calculate_model_output(x, model):
         return model(x)
 
 
-def train_model_if_not_trained():
-    pass
+def train_model_if_not_trained(
+    X, y, df, model, num_epochs, skip_epochs, learning_rate,
+    plot_frames_dir, predictions_plot_mesh_size):
 
-def entry_point():
-    """
-    Ready? Go!
-    The entry point of the program.
-    """
-
-    np.random.seed(0)
-    torch.manual_seed(0)
-    plot_dir = 'plots/q3'
-    plot_frames_dir = 'plots/q3/movie_frames'
-
-    X, y, df = read_data('data/ps5_data.csv')
     x, _, _ = normalize(X)
-
-    n_inputs = x.shape[1]
-    n_hidden = 3
-
     x = torch.tensor(x, dtype=torch.float32)
     y = torch.tensor(y, dtype=torch.float32)
-
-    # Construct the model.
-    model = torch.nn.Sequential(
-        torch.nn.Linear(n_inputs, n_hidden),
-        torch.nn.Sigmoid(),
-        torch.nn.Linear(n_hidden, 1)
-    )
-
     loss_fn = torch.nn.MSELoss(reduction='sum')
-    num_epochs = 3000
-    skip_epochs = 100
-    predictions_plot_mesh_size = 300
-    learning_rate = 1e-3
     losses = np.empty(int(num_epochs / skip_epochs))
     optimizer = torch.optim.SGD(model.parameters(), lr=learning_rate)
     n_out = 0
@@ -92,6 +65,42 @@ def entry_point():
                 },
                 show_epoch=True
             )
+
+    return losses
+
+def entry_point():
+    """
+    Ready? Go!
+    The entry point of the program.
+    """
+
+    np.random.seed(0)
+    torch.manual_seed(0)
+    plot_dir = 'plots/q3'
+    plot_frames_dir = 'plots/q3/movie_frames'
+    n_hidden = 3
+    num_epochs = 3000
+    skip_epochs = 100
+    predictions_plot_mesh_size = 300
+    learning_rate = 1e-3
+
+    X, y, df = read_data('data/ps5_data.csv')
+    n_inputs = X.shape[1]
+
+    # Construct the model.
+    model = torch.nn.Sequential(
+        torch.nn.Linear(n_inputs, n_hidden),
+        torch.nn.Sigmoid(),
+        torch.nn.Linear(n_hidden, 1)
+    )
+
+    losses = train_model_if_not_trained(
+        X=X, y=y, df=df, model=model, num_epochs=num_epochs,
+        skip_epochs=skip_epochs,
+        learning_rate=learning_rate,
+        plot_frames_dir=plot_frames_dir,
+        predictions_plot_mesh_size=predictions_plot_mesh_size
+    )
 
     plot_losses(losses, skip_epochs, plot_dir=plot_dir)
 
