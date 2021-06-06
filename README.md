@@ -1,6 +1,6 @@
 # ASP5020 problem set
 
-My problem set solutions for data analysis and machine learning unit.
+My problem set solutions for [data analysis and machine learning unit](http://astrowizici.st/teaching/phs5000) taught by Andy Casey in the first half of 2021.
 
 
 ## Running Python code
