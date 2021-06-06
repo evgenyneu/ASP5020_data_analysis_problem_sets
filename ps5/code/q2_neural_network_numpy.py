@@ -126,6 +126,24 @@ def calculate_model_output(
     return output, hidden_layer_outputs
 
 
+def calculate_model_output_from_original_data(
+    x, n_observations, hidden_layer_weights, output_layer_weights):
+    """
+    Same calculate_model_output `calculate_model_output` function
+    but the original un-normalized numbers `x` are supplied instead
+    """
+
+    inputs_with_bias = make_input(x)
+
+    y_pred, _ = calculate_model_output(
+        inputs_with_bias=inputs_with_bias,
+        n_observations=n_observations,
+        hidden_layer_weights=hidden_layer_weights,
+        output_layer_weights=output_layer_weights)
+
+    return y_pred
+
+
 def calculate_gradients(x, y, y_pred, n_hidden, hidden_layer_outputs,
                         output_layer_weights, gradients):
     """
@@ -293,7 +311,8 @@ def generate_weights(n_inputs, n_hidden):
 def train_model(X, x, y, df, num_epochs, n_observations, n_hidden,
                 inputs_with_bias,
                 hidden_layer_weights, output_layer_weights, skip_epochs,
-                predictions_plots_dir):
+                predictions_plots_dir,
+                predictions_plot_mesh_size):
     """
     Train the model by iterating `num_epochs` number of times and updating
     the model weights through backpropagation.
@@ -328,8 +347,11 @@ def train_model(X, x, y, df, num_epochs, n_observations, n_hidden,
 
     for epoch in range(num_epochs):
         y_pred, hidden_layer_outputs = calculate_model_output(
-            n_observations, inputs_with_bias,
-            hidden_layer_weights, output_layer_weights)
+            inputs_with_bias=inputs_with_bias,
+            n_observations=n_observations,
+            hidden_layer_weights=hidden_layer_weights,
+            output_layer_weights=output_layer_weights
+        )
 
         calculate_gradients(
             x=x,
@@ -354,12 +376,18 @@ def train_model(X, x, y, df, num_epochs, n_observations, n_hidden,
             n_out += 1
 
             plot_predictions(
-                X, y, df, hidden_layer_weights,
-                output_layer_weights,
-                predictions_plot_mesh_size=300,
+                X, y, df,
+                mesh_size=predictions_plot_mesh_size,
                 epoch=epoch,
                 image_format='png',
-                plot_dir=predictions_plots_dir
+                plot_dir=predictions_plots_dir,
+                run_model_func=calculate_model_output_from_original_data,
+                run_model_args={
+                    "n_observations": predictions_plot_mesh_size,
+                    "hidden_layer_weights": hidden_layer_weights,
+                    "output_layer_weights": output_layer_weights
+                },
+                show_epoch=True
             )
 
     return losses
@@ -393,7 +421,8 @@ def plot_losses(losses, skip_epochs, plot_dir, ylim=[0, 20]):
 
 
 def initialize_and_train_model(X, y, df, n_hidden, num_epochs, skip_epochs,
-                               predictions_plots_dir):
+                               predictions_plots_dir,
+                               predictions_plot_mesh_size):
     """
     Initializes the model weights and runs the model training given the
     input data.
@@ -441,7 +470,8 @@ def initialize_and_train_model(X, y, df, n_hidden, num_epochs, skip_epochs,
         hidden_layer_weights=hidden_layer_weights,
         output_layer_weights=output_layer_weights,
         skip_epochs=skip_epochs,
-        predictions_plots_dir=predictions_plots_dir
+        predictions_plots_dir=predictions_plots_dir,
+        predictions_plot_mesh_size=predictions_plot_mesh_size
     )
 
     return hidden_layer_weights, output_layer_weights, losses
@@ -496,7 +526,7 @@ def load_weights_from_cache(cache_dir):
 
 def train_model_or_get_weights_from_cache(
         X, y, df, n_hidden, num_epochs, cache_dir,
-        skip_epochs, predictions_plots_dir):
+        skip_epochs, predictions_plots_dir, predictions_plot_mesh_size):
     """
     Initializes and trains the model. If model has already been trained
     and the weight files are stored in local files, then return the
@@ -527,12 +557,15 @@ def train_model_or_get_weights_from_cache(
         return hidden_layer_weights, output_layer_weights, losses
 
     hidden_layer_weights, output_layer_weights, losses = \
-        initialize_and_train_model(X, y,
-                                   df=df,
-                                   n_hidden=n_hidden,
-                                   num_epochs=num_epochs,
-                                   skip_epochs=skip_epochs,
-                                   predictions_plots_dir=predictions_plots_dir)
+        initialize_and_train_model(
+            X, y,
+            df=df,
+            n_hidden=n_hidden,
+            num_epochs=num_epochs,
+            skip_epochs=skip_epochs,
+            predictions_plots_dir=predictions_plots_dir,
+            predictions_plot_mesh_size=predictions_plot_mesh_size
+        )
 
     save_weights_to_cache(cache_dir, hidden_layer_weights,
                           output_layer_weights, losses)
@@ -540,8 +573,8 @@ def train_model_or_get_weights_from_cache(
     return hidden_layer_weights, output_layer_weights, losses
 
 
-def calc_prediction_mesh(X, y, hidden_layer_weights, output_layer_weights,
-                         mesh_size, padding):
+def calc_prediction_mesh(X, mesh_size, padding,
+                         run_model_func, run_model_args):
     """
     Calculates the data arrays (2d arrays called mesh) for predictions plot.
 
@@ -590,12 +623,7 @@ def calc_prediction_mesh(X, y, hidden_layer_weights, output_layer_weights,
     for i, x2 in enumerate(x2_grid):
         x2_single = np.array([x2] * len(x2_grid)).reshape((-1, 1))
         x_data = np.hstack([x1_grid, x2_single])
-        inputs_with_bias = make_input(x_data)
-
-        y_pred, _ = calculate_model_output(
-            mesh_size, inputs_with_bias,
-            hidden_layer_weights, output_layer_weights)
-
+        y_pred = run_model_func(x=x_data, **run_model_args)
         prediction_mesh[i, :] = y_pred[:, 0]
 
     x1_grid_denormilized = x1_grid * x_std[0] + x_mean[0]
@@ -646,9 +674,9 @@ def scale_lightness(hex_color, scale_l):
     return colorsys.hls_to_rgb(h, min(1, l * scale_l), s=s)
 
 
-def plot_predictions(X, y, df, hidden_layer_weights, output_layer_weights,
-                     predictions_plot_mesh_size,
-                     epoch, plot_dir, image_format, show_epoch=True):
+def plot_predictions(X, y, df, mesh_size,
+                     epoch, plot_dir, image_format,
+                     run_model_func, run_model_args, show_epoch=True):
     """
     Plot the prediction of the model along with the input data.
     The plot is stored in a file.
@@ -658,6 +686,9 @@ def plot_predictions(X, y, df, hidden_layer_weights, output_layer_weights,
 
     df: Pandas' data frame.
         Contains input data.
+
+    mesh_size: int
+        Number of calculated predictions along each of the two plot axes.
 
     epoch: int
         The epoch index.
@@ -679,11 +710,10 @@ def plot_predictions(X, y, df, hidden_layer_weights, output_layer_weights,
 
     x, y, z = calc_prediction_mesh(
         X=X,
-        y=y,
-        hidden_layer_weights=hidden_layer_weights,
-        output_layer_weights=output_layer_weights,
-        mesh_size=predictions_plot_mesh_size,
-        padding=axis_padding
+        mesh_size=mesh_size,
+        padding=axis_padding,
+        run_model_func=run_model_func,
+        run_model_args=run_model_args
     )
 
     fig, ax = plt.subplots()
@@ -739,23 +769,36 @@ def entry_point():
     np.random.seed(0)
     X, y, df = read_data('data/ps5_data.csv')
     skip_epochs = 100
-    num_epochs = 30000
+    num_epochs = 3000
     plot_frames_dir = 'plots/q2/movie_frames'
     plot_dir = 'plots/q2'
+    predictions_plot_mesh_size = 300
 
     hidden_layer_weights, output_layer_weights, losses = \
         train_model_or_get_weights_from_cache(
             X=X, y=y, df=df,
             n_hidden=3, num_epochs=num_epochs, skip_epochs=skip_epochs,
             cache_dir='weights_cache',
-            predictions_plots_dir=plot_frames_dir)
+            predictions_plots_dir=plot_frames_dir,
+            predictions_plot_mesh_size=predictions_plot_mesh_size
+        )
 
     plot_losses(losses, skip_epochs, plot_dir=plot_dir)
 
-    plot_predictions(X, y, df, hidden_layer_weights, output_layer_weights,
-                     predictions_plot_mesh_size=300,
-                     epoch=int(num_epochs/skip_epochs),
-                     plot_dir=plot_dir, image_format='pdf', show_epoch=False)
+    plot_predictions(
+        X, y, df,
+        mesh_size=predictions_plot_mesh_size,
+        epoch=int(num_epochs/skip_epochs),
+        plot_dir=plot_dir,
+        image_format='pdf',
+        run_model_func=calculate_model_output_from_original_data,
+        run_model_args={
+            "n_observations": predictions_plot_mesh_size,
+            "hidden_layer_weights": hidden_layer_weights,
+            "output_layer_weights": output_layer_weights
+        },
+        show_epoch=False
+    )
 
     make_movie_from_images(
         plot_dir=plot_frames_dir,

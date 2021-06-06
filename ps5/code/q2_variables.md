@@ -1,6 +1,44 @@
 
 # Common variables used in q2 code.
 
+
+## gradients
+
+numpy.ndarray 1D array.
+Contains the list of gradients for all weights.
+
+Example:
+
+For network with two inputs and three nodes in the hidden layer:
+
+```
+[g1, g2, g3, g4, g5, g6, .... g13],
+```
+
+where g1, g2, g3 are gradients for the weights for connections coming from the bias in the input layer, g4, g5, g6 are for first input node etc.
+
+
+## hidden_layer_outputs
+
+N by H numpy.ndarray 2D array.
+Outputs coming from the nodes of the hidden layer.
+where
+  * N is the number of observations,
+  * H is the number nodes in the hidden layer (excluding the bias)
+
+Example:
+
+For three nodes with outputs h1, h2, h3 in the hidden layer:
+```
+[
+    [h1, h2, h3],
+    [h1, h2, h3],
+    [h1, h2, h3],
+    ...
+    [h1, h2, h3]
+].
+```
+
 ## hidden_layer_weights
 
 M + 1 by H numpy.ndarray 2D array.
@@ -90,43 +128,11 @@ where w10 is for connection coming from hidden layer bias, and w11, w12, w13
 are for three nodes in the hidden layer.
 
 
+## predictions_plot_mesh_size:
 
-## gradients
-
-numpy.ndarray 1D array.
-Contains the list of gradients for all weights.
-
-Example:
-
-For network with two inputs and three nodes in the hidden layer:
-
-```
-[g1, g2, g3, g4, g5, g6, .... g13],
-```
-
-where g1, g2, g3 are gradients for the weights for connections coming from the bias in the input layer, g4, g5, g6 are for first input node etc.
-
-
-## hidden_layer_outputs
-
-N by H numpy.ndarray 2D array.
-Outputs coming from the nodes of the hidden layer.
-where
-  * N is the number of observations,
-  * H is the number nodes in the hidden layer (excluding the bias)
-
-Example:
-
-For three nodes with outputs h1, h2, h3 in the hidden layer:
-```
-[
-    [h1, h2, h3],
-    [h1, h2, h3],
-    [h1, h2, h3],
-    ...
-    [h1, h2, h3]
-].
-```
+int
+Number of predictions to display along each of the two axes
+of prediction plot.
 
 
 
