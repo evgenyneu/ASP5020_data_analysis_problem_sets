@@ -376,7 +376,7 @@ def train_model(X, x, y, df, num_epochs, n_observations, n_hidden,
             n_out += 1
 
             plot_predictions(
-                X, y, df,
+                X, df,
                 mesh_size=predictions_plot_mesh_size,
                 epoch=epoch,
                 image_format='png',
@@ -589,6 +589,12 @@ def calc_prediction_mesh(X, mesh_size, padding,
         and right so that the inputs are not shown at the very
         edges of the plot.
 
+    run_model_func: function
+        Function that calculates model predictions.
+
+    run_model_args: dict
+        Arguments passed to run_model_func function.
+
     other parameters:
         See q2_variables.md.
 
@@ -674,9 +680,9 @@ def scale_lightness(hex_color, scale_l):
     return colorsys.hls_to_rgb(h, min(1, l * scale_l), s=s)
 
 
-def plot_predictions(X, y, df, mesh_size,
+def plot_predictions(X, df, mesh_size,
                      epoch, plot_dir, image_format,
-                     run_model_func, run_model_args, show_epoch=True):
+                     run_model_func, run_model_args, show_epoch):
     """
     Plot the prediction of the model along with the input data.
     The plot is stored in a file.
@@ -701,6 +707,12 @@ def plot_predictions(X, y, df, mesh_size,
 
     show_epoch: bool
         If True an epoch number is shown on the plot.
+
+    run_model_func: function
+        Function that calculates model predictions.
+
+    run_model_args: dict
+        Arguments passed to run_model_func function.
 
     other parameters:
         See q2_variables.md.
@@ -786,7 +798,7 @@ def entry_point():
     plot_losses(losses, skip_epochs, plot_dir=plot_dir)
 
     plot_predictions(
-        X, y, df,
+        X, df,
         mesh_size=predictions_plot_mesh_size,
         epoch=int(num_epochs/skip_epochs),
         plot_dir=plot_dir,

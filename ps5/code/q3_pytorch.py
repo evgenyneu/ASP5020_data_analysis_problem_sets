@@ -65,6 +65,21 @@ def entry_point():
             losses[n_out] = loss.item()
             n_out += 1
 
+            plot_predictions(
+                X, y, df,
+                mesh_size=predictions_plot_mesh_size,
+                epoch=epoch,
+                image_format='png',
+                plot_dir=predictions_plots_dir,
+                run_model_func=calculate_model_output_from_original_data,
+                run_model_args={
+                    "n_observations": predictions_plot_mesh_size,
+                    "hidden_layer_weights": hidden_layer_weights,
+                    "output_layer_weights": output_layer_weights
+                },
+                show_epoch=True
+            )
+
     plot_losses(losses, skip_epochs, plot_dir=plot_dir)
 
 
