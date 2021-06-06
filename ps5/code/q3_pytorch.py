@@ -14,6 +14,7 @@ See README.md
 """
 
 import numpy as np
+import os
 import torch
 from plot_utils import save_plot, set_plot_style
 
@@ -29,7 +30,7 @@ def calculate_model_output(x, model):
         return model(x)
 
 
-def train_model_if_not_trained(
+def train_model(
     X, y, df, model, num_epochs, skip_epochs, learning_rate,
     plot_frames_dir, predictions_plot_mesh_size):
 
@@ -68,6 +69,48 @@ def train_model_if_not_trained(
 
     return losses
 
+
+def save_model_to_cache(model, losses, cache_dir, mode_file_name):
+    os.makedirs(cache_dir, exist_ok=True)
+    model_path = os.path.join(cache_dir, mode_file_name)
+    torch.save(model.state_dict(), model_path)
+    path = os.path.join(cache_dir, 'losses')
+    np.save(path, losses)
+
+
+def load_model_from_cache(model, cache_dir, mode_file_name):
+    model_path = os.path.join(cache_dir, "model.zip")
+    model.load_state_dict(torch.load(model_path))
+    model.eval()
+    losses = np.load(os.path.join(cache_dir, 'losses.npy'))
+    return model, losses
+
+
+def train_model_if_not_trained(
+    X, y, df, model, num_epochs, skip_epochs, learning_rate,
+    cache_dir,  plot_frames_dir, predictions_plot_mesh_size):
+
+    this_dir = os.path.dirname(os.path.realpath(__file__))
+    full_cache_dir = os.path.join(this_dir, cache_dir)
+    mode_file_name = "model.zip"
+    model_path = os.path.join(full_cache_dir, mode_file_name)
+
+    if os.path.exists(model_path):
+        model, losses = load_model_from_cache(model, cache_dir, mode_file_name)
+    else:
+        losses = train_model(
+            X=X, y=y, df=df, model=model, num_epochs=num_epochs,
+            skip_epochs=skip_epochs,
+            learning_rate=learning_rate,
+            plot_frames_dir=plot_frames_dir,
+            predictions_plot_mesh_size=predictions_plot_mesh_size
+        )
+
+        save_model_to_cache(model, losses, cache_dir, mode_file_name)
+
+    return losses
+
+
 def entry_point():
     """
     Ready? Go!
@@ -79,7 +122,7 @@ def entry_point():
     plot_dir = 'plots/q3'
     plot_frames_dir = 'plots/q3/movie_frames'
     n_hidden = 3
-    num_epochs = 3000
+    num_epochs = 30000
     skip_epochs = 100
     predictions_plot_mesh_size = 300
     learning_rate = 1e-3
@@ -99,6 +142,7 @@ def entry_point():
         skip_epochs=skip_epochs,
         learning_rate=learning_rate,
         plot_frames_dir=plot_frames_dir,
+        cache_dir='model_cache/q3',
         predictions_plot_mesh_size=predictions_plot_mesh_size
     )
 
