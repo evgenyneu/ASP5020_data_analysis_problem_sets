@@ -1,3 +1,18 @@
+"""
+A neural network with a single layer that is trained to classify
+the data using Pytorch library. Plots the data, the loss function
+and the model predictions.
+
+Based heavily on code provided in Andy Casey's lecture notes:
+http://astrowizici.st/teaching/phs5000/13/
+
+
+How to run
+----------
+
+See README.md
+"""
+
 import numpy as np
 import torch
 from plot_utils import save_plot, set_plot_style
