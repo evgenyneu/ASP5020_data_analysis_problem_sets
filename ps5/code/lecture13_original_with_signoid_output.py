@@ -1,3 +1,7 @@
+# Original code from Andy Casey's lecture notes
+# that makes a neural network in Numpy
+# http://astrowizici.st/teaching/phs5000/13/
+
 import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib.ticker import MaxNLocator
@@ -7,6 +11,7 @@ from plot_utils import save_plot, set_plot_style, \
     MARKER_SIZE, LINE_COLOR
 
 set_plot_style()
+plot_dir = 'plots/lecture13'
 
 # For reproducibility
 np.random.seed(0)
@@ -209,7 +214,7 @@ ax.xaxis.set_major_locator(MaxNLocator(6))
 ax.yaxis.set_major_locator(MaxNLocator(6))
 ax.grid(zorder=1)
 fig.tight_layout(pad=0.20)
-save_plot(plt, suffix='01', extensions=['svg'])
+save_plot(plt, suffix='01', extensions=['svg'], subdir=plot_dir)
 
 
 # Compare predictions with data
@@ -251,7 +256,7 @@ ax.xaxis.set_major_locator(MaxNLocator(6))
 ax.yaxis.set_major_locator(MaxNLocator(6))
 ax.grid(zorder=1)
 fig.tight_layout(pad=0.20)
-save_plot(plt, suffix='02')
+save_plot(plt, suffix='02', subdir=plot_dir)
 
 print('We are done!')
 

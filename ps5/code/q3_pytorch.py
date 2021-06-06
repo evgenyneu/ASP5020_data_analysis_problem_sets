@@ -11,6 +11,9 @@ def entry_point():
     """
 
     np.random.seed(0)
+    torch.manual_seed(0)
+    plot_dir = 'plots/q3'
+
     X, y, df = read_data('data/ps5_data.csv')
     x, _, _ = normalize(X)
 
@@ -28,25 +31,26 @@ def entry_point():
     )
 
     loss_fn = torch.nn.MSELoss(reduction='sum')
-
-    epochs = 3000
+    num_epochs = 3000
     skip_epochs = 100
     learning_rate = 1e-3
-    losses = np.empty(epochs)
+    losses = np.empty(int(num_epochs / skip_epochs))
     optimizer = torch.optim.SGD(model.parameters(), lr=learning_rate)
+    n_out = 0
 
-    for t in range(epochs):
+    for epoch in range(num_epochs):
         y_pred = model(x)  # Calculate model predictions
         loss = loss_fn(y_pred, y)
-        losses[t] = loss.item()
         optimizer.zero_grad()
         loss.backward()  # Calculate the gradients
         optimizer.step()  # Update the weights
 
-         if t % skip_epochs == 0:
-            print(t, loss.item())
+        if epoch % skip_epochs == 0:
+            print(epoch, loss.item())
+            losses[n_out] = loss.item()
+            n_out += 1
 
-    plot_losses(losses, skip_epochs, suffix='pytorch')
+    plot_losses(losses, skip_epochs, plot_dir=plot_dir)
 
 
 if __name__ == "__main__":

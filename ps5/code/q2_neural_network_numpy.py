@@ -214,7 +214,9 @@ def loss_function(y, y_pred):
         Value of the loss function.
     """
 
-    return 0.5 * np.sum((y_pred - y)**2)
+    # Note, there is no 0.5 factor here
+    # to make it identical to torch.nn.MSELoss(reduction='sum')
+    return np.sum((y_pred - y)**2)
 
 
 def make_input(x):
@@ -346,10 +348,7 @@ def train_model(X, x, y, df, num_epochs, n_observations, n_hidden,
                        output_layer_weights=output_layer_weights)
 
         if epoch % skip_epochs == 0:
-            # Calculate loss function
             loss = loss_function(y, y_pred)
-
-            # print and store
             print(epoch, loss)
             losses[n_out] = loss
             n_out += 1
@@ -366,7 +365,7 @@ def train_model(X, x, y, df, num_epochs, n_observations, n_hidden,
     return losses
 
 
-def plot_losses(losses, skip_epochs, ylim=[0, 10], suffix=None):
+def plot_losses(losses, skip_epochs, plot_dir, ylim=[0, 20]):
     """
     Plots the values of the loss function over iterations (epochs).
     The plot is saved to a file.
@@ -378,10 +377,10 @@ def plot_losses(losses, skip_epochs, ylim=[0, 10], suffix=None):
         Number of epochs skipped before storing the loss during model training.
 
     ylim: list
-        Y axis limits.
+        Y axis limits: [min, max]
 
-    suffix: str
-        Text added to the end of the plot file name.
+    plot_dir: str
+        Directory for the output plot file.
     """
     fig, ax = plt.subplots()
     ax.plot(losses, zorder=2, color='#ff0021')
@@ -390,7 +389,7 @@ def plot_losses(losses, skip_epochs, ylim=[0, 10], suffix=None):
     ax.set_ylim(ylim)
     ax.grid(zorder=1)
     fig.tight_layout(pad=0.20)
-    save_plot(plt, suffix=suffix)
+    save_plot(plt, file_name='loss', subdir=plot_dir)
 
 
 def initialize_and_train_model(X, y, df, n_hidden, num_epochs, skip_epochs,
@@ -719,7 +718,14 @@ def plot_predictions(X, y, df, hidden_layer_weights, output_layer_weights,
             bbox=dict(facecolor='white', alpha=0.8, edgecolor='0.7'))
 
     fig.tight_layout(pad=0.30)
-    save_plot(plt, extensions=[image_format], subdir=plot_dir, suffix=f"02_{epoch:05d}")
+
+    save_plot(
+        plt,
+        extensions=[image_format],
+        subdir=plot_dir,
+        file_name=f"predictions_epoch_{epoch:05d}"
+    )
+
     fig.clear()
     plt.close()
 
@@ -734,7 +740,8 @@ def entry_point():
     X, y, df = read_data('data/ps5_data.csv')
     skip_epochs = 100
     num_epochs = 30000
-    plot_frames_dir = 'q2_movie_frames'
+    plot_frames_dir = 'plots/q2/movie_frames'
+    plot_dir = 'plots/q2'
 
     hidden_layer_weights, output_layer_weights, losses = \
         train_model_or_get_weights_from_cache(
@@ -743,17 +750,17 @@ def entry_point():
             cache_dir='weights_cache',
             predictions_plots_dir=plot_frames_dir)
 
-    plot_losses(losses, skip_epochs)
+    plot_losses(losses, skip_epochs, plot_dir=plot_dir)
 
     plot_predictions(X, y, df, hidden_layer_weights, output_layer_weights,
                      predictions_plot_mesh_size=300,
                      epoch=int(num_epochs/skip_epochs),
-                     plot_dir='plots', image_format='pdf', show_epoch=False)
+                     plot_dir=plot_dir, image_format='pdf', show_epoch=False)
 
     make_movie_from_images(
         plot_dir=plot_frames_dir,
-        movie_dir='plots',
-        movie_name='q2_predictions.mp4',
+        movie_dir=plot_dir,
+        movie_name='predictions.mp4',
         frame_rate=30
     )
 

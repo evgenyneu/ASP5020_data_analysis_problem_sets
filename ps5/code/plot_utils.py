@@ -60,7 +60,8 @@ def set_plot_style():
     plt.rcParams['grid.alpha'] = 0.2
 
 
-def save_plot(plt, suffix=None, extensions=['pdf'], subdir='plots', dpi=300,
+def save_plot(plt, file_name=None, suffix=None,
+              extensions=['pdf'], subdir='plots', dpi=300,
               silent=False):
     """
     Saves a plot to an image file. The name of the
@@ -74,6 +75,11 @@ def save_plot(plt, suffix=None, extensions=['pdf'], subdir='plots', dpi=300,
 
     plt :
         Matplotlib's plot object
+
+    file_name: str
+        Base name (name without extension) for the plot file.
+        If None, the name of Python script that called this function
+        will be used.
 
     suffix : str
         File name suffix for the output image file name.
@@ -96,7 +102,9 @@ def save_plot(plt, suffix=None, extensions=['pdf'], subdir='plots', dpi=300,
     this_dir = os.path.dirname(codefile)
     plot_dir = os.path.join(this_dir, subdir)
     os.makedirs(plot_dir, exist_ok=True)
-    code_file_without_extension = os.path.basename(codefile).rsplit('.', 1)[0]
+
+    if file_name is None:
+        file_name = os.path.basename(codefile).rsplit('.', 1)[0]
 
     if suffix is None:
         suffix = ''
@@ -104,7 +112,7 @@ def save_plot(plt, suffix=None, extensions=['pdf'], subdir='plots', dpi=300,
         suffix = f'_{suffix}'
 
     for extension in extensions:
-        filename = f'{code_file_without_extension}{suffix}.{extension}'
+        filename = f'{file_name}{suffix}.{extension}'
         figure_path = os.path.join(plot_dir, filename)
         plt.savefig(figure_path, dpi=dpi)
         printed_path = os.path.join(subdir, filename)

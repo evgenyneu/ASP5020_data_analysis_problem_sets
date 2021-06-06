@@ -7,6 +7,7 @@ TYPE1_EDGE_COLOR = '#0060ff'
 TYPE2_FACE_COLOR = '#febcc4aa'
 TYPE2_EDGE_COLOR = '#ff0021'
 
+
 def plot_type(ax, df, type, marker, facecolor, edgecolor):
     """
     Plots an observation type from the data.
@@ -67,7 +68,7 @@ def set_plot_limits(ax, df, padding):
     ax.set_ylim(y.min() - y_range * padding, y.max() + y_range * padding)
 
 
-def plot_data(path_to_data):
+def plot_data(path_to_data, plot_dir):
     """
     Reads CSV file and plots the data.
 
@@ -76,6 +77,9 @@ def plot_data(path_to_data):
 
     path_to_data: string
         Path to the CSV file.
+
+    plot_dir: string
+        Path to plot directory.
     """
 
     df = pd.read_csv(path_to_data)
@@ -91,11 +95,11 @@ def plot_data(path_to_data):
     set_plot_limits(ax, df, padding=0.05)
     plt.subplots_adjust(left=0, right=1, top=1, bottom=0)
     fig.tight_layout(pad=0.20)
-    save_plot(fig)
+    save_plot(fig, subdir=plot_dir)
 
 
 if __name__ == "__main__":
     set_plot_style()
-    plot_data('data/ps5_data.csv')
+    plot_data('data/ps5_data.csv', plot_dir='plots/q1')
 
     print('We are done')

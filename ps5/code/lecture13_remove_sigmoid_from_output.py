@@ -1,3 +1,9 @@
+# Modified version of code from Andy Casey's lecture notes
+# http://astrowizici.st/teaching/phs5000/13/
+# that makes a neural network in Numpy.
+# In this modification the sigmoid activation function
+# was removed from the output node.
+
 import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib.ticker import MaxNLocator
@@ -6,6 +12,7 @@ from plot_utils import save_plot, set_plot_style, \
     MARKER_FACE_COLOR, MARKER_EDGE_COLOR, MARKER_EDGE_WIDTH, \
     MARKER_SIZE, LINE_COLOR
 
+plot_dir = 'plots/lecture13'
 set_plot_style()
 
 # For reproducibility
@@ -209,7 +216,7 @@ ax.xaxis.set_major_locator(MaxNLocator(6))
 ax.yaxis.set_major_locator(MaxNLocator(6))
 ax.grid(zorder=1)
 fig.tight_layout(pad=0.20)
-save_plot(plt, suffix='01', extensions=['svg'])
+save_plot(plt, suffix='01', extensions=['svg'], subdir=plot_dir)
 
 
 # Compare predictions with data
@@ -251,7 +258,7 @@ ax.xaxis.set_major_locator(MaxNLocator(6))
 ax.yaxis.set_major_locator(MaxNLocator(6))
 ax.grid(zorder=1)
 fig.tight_layout(pad=0.20)
-save_plot(plt, suffix='02')
+save_plot(plt, suffix='02', subdir=plot_dir)
 
 print('We are done!')
 
