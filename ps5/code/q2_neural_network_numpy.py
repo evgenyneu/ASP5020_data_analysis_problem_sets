@@ -783,7 +783,7 @@ def entry_point():
     np.random.seed(0)
     X, y, df = read_data('data/ps5_data.csv')
     skip_epochs = 100
-    num_epochs = 300
+    num_epochs = 30000
     plot_frames_dir = 'plots/q2/movie_frames'
     plot_dir = 'plots/q2'
     predictions_plot_mesh_size = 300
