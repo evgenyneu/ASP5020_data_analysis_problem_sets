@@ -122,7 +122,7 @@ def entry_point():
     plot_dir = 'plots/q3'
     plot_frames_dir = 'plots/q3/movie_frames'
     n_hidden = 3
-    num_epochs = 300
+    num_epochs = 30000
     skip_epochs = 100
     predictions_plot_mesh_size = 300
     learning_rate = 1e-3
