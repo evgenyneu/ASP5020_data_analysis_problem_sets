@@ -47,7 +47,7 @@ def read_data(path_to_data):
 
     """
 
-    df = pd.read_csv(path_to_data)
+    df = pd.read_csv(path_to_data, dtype=np.float32)
     x1 = df['x_1'].to_numpy().reshape((-1, 1))
     x2 = df['x_2'].to_numpy().reshape((-1, 1))
     x = np.hstack([x1, x2])
