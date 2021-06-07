@@ -122,7 +122,7 @@ def entry_point():
     plot_dir = 'plots/q3'
     plot_frames_dir = 'plots/q3/movie_frames'
     n_hidden = 3
-    num_epochs = 30000
+    num_epochs = 300
     skip_epochs = 100
     predictions_plot_mesh_size = 300
     learning_rate = 1e-3
@@ -147,6 +147,19 @@ def entry_point():
     )
 
     plot_losses(losses, skip_epochs, plot_dir=plot_dir)
+
+    plot_predictions(
+        X, df,
+        mesh_size=predictions_plot_mesh_size,
+        epoch=int(num_epochs/skip_epochs),
+        image_format='pdf',
+        plot_dir=plot_dir,
+        run_model_func=calculate_model_output,
+        run_model_args={
+            "model": model,
+        },
+        show_epoch=False
+    )
 
     make_movie_from_images(
         plot_dir=plot_frames_dir,
