@@ -44,7 +44,7 @@ def calculate_model_output(x, model):
     The output predicted value of the model.
     """
 
-    return model(x)
+    return model(x, training=False)
 
 
 def train_model(
@@ -104,18 +104,18 @@ def train_model(
             losses[n_out] = loss.numpy()
             n_out += 1
 
-            # plot_predictions(
-            #     X, df,
-            #     mesh_size=predictions_plot_mesh_size,
-            #     epoch=epoch,
-            #     image_format='png',
-            #     plot_dir=plot_frames_dir,
-            #     run_model_func=calculate_model_output,
-            #     run_model_args={
-            #         "model": model,
-            #     },
-            #     show_epoch=True
-            # )
+            plot_predictions(
+                X, df,
+                mesh_size=predictions_plot_mesh_size,
+                epoch=epoch,
+                image_format='png',
+                plot_dir=plot_frames_dir,
+                run_model_func=calculate_model_output,
+                run_model_args={
+                    "model": model,
+                },
+                show_epoch=True
+            )
 
     return losses
 
