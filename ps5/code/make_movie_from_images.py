@@ -1,4 +1,4 @@
-"""Create mp4 movie from images"""
+"""Create mp4 movie from images. Requires ffmpeg program to be installed."""
 
 from shutil import move
 import os
