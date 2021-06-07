@@ -227,8 +227,8 @@ def entry_point():
 
     np.random.seed(0)
     torch.manual_seed(0)
-    plot_dir = 'plots/q3'
-    plot_frames_dir = 'plots/q3/movie_frames'
+    plot_dir = 'plots/q3_pytorch'
+    plot_frames_dir = 'plots/q3_pytorch/movie_frames'
     n_hidden = 3
     num_epochs = 30000
     skip_epochs = 100
@@ -250,7 +250,7 @@ def entry_point():
         skip_epochs=skip_epochs,
         learning_rate=learning_rate,
         plot_frames_dir=plot_frames_dir,
-        cache_dir='model_cache/q3',
+        cache_dir='model_cache/q3_pytorch',
         predictions_plot_mesh_size=predictions_plot_mesh_size
     )
 
