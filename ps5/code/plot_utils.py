@@ -34,16 +34,16 @@ def set_plot_style():
     plt.rcParams['xtick.labelsize'] = TINY_SIZE
     plt.rcParams['ytick.labelsize'] = TINY_SIZE
 
-    # Legend text size
-    plt.rcParams['legend.fontsize'] = SMALL_SIZE
-
+    # Text size
     plt.rcParams['font.size'] = NORMAL_SIZE
-    plt.rcParams['legend.fontsize'] = NORMAL_SIZE
 
     # Legend location
     plt.rcParams["legend.loc"] = 'upper right'
     plt.rcParams["legend.framealpha"] = 0.9
     plt.rcParams["legend.edgecolor"] = '#000000'
+
+    # Legend text size
+    plt.rcParams['legend.fontsize'] = SMALL_SIZE
 
     # Grid color
     plt.rcParams['grid.color'] = '#cccccc'
