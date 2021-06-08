@@ -8,6 +8,7 @@ import os
 import matplotlib.pyplot as plt
 from plot_utils import save_plot, set_plot_style
 from q1_plot_data import TYPE1_EDGE_COLOR, TYPE2_EDGE_COLOR
+from itertools import cycle
 
 
 def load_losses_from_cache(cache_dir):
@@ -23,7 +24,7 @@ def load_losses_from_cache(cache_dir):
     return np.load(os.path.join(cache_dir, 'losses.npy'))
 
 
-def plot_losses(q2_losses, q3_losses, skip_epochs, plot_dir, ylim=[0, 20]):
+def plot_losses(all_losses, labels, skip_epochs, plot_dir, ylim=[0, 20]):
     """
     Plots the values of the loss function over iterations (epochs).
     The plot is saved to a file.
@@ -31,8 +32,11 @@ def plot_losses(q2_losses, q3_losses, skip_epochs, plot_dir, ylim=[0, 20]):
     Parameters
     ----------
 
-    q2_losses, q3_losses: list of floats
-        Values of the loss function at subsequent epoch for q2 and q3 models.
+    all_losses: list of lost of floats
+        List containing losses for different codes (python, pytorch, tensorflow)
+
+    labels: list of str
+        Names of the codes corresponding to items in `all_losses` parameter.
 
     skip_epochs: int
         Number of epochs skipped before storing the loss during model training.
@@ -44,8 +48,20 @@ def plot_losses(q2_losses, q3_losses, skip_epochs, plot_dir, ylim=[0, 20]):
         Directory for the output plot file.
     """
     fig, ax = plt.subplots()
-    ax.plot(q2_losses, zorder=2, color=TYPE1_EDGE_COLOR, label='Numpy')
-    ax.plot(q3_losses, zorder=2, color=TYPE2_EDGE_COLOR, label='Pytorch')
+    line_styles = ["-", "--", "-.", ":"]
+    line_style_cycler = cycle(line_styles)
+    colors = [TYPE1_EDGE_COLOR, TYPE2_EDGE_COLOR, '#44aa22']
+    color_cycler = cycle(colors)
+
+    for losses, label in zip(all_losses, labels):
+        ax.plot(
+            losses,
+            zorder=2,
+            label=label,
+            linestyle=next(line_style_cycler),
+            color=next(color_cycler)
+        )
+
     ax.set_xlabel(f"Epoch (x{skip_epochs})")
     ax.set_ylabel('Loss')
     ax.set_ylim(ylim)
@@ -60,12 +76,14 @@ def entry_point():
     Ready? Go!
     The entry point of the program.
     """
-    q2_losses = load_losses_from_cache('model_cache/q2')
-    q3_losses = load_losses_from_cache('model_cache/q3')
+
+    dirs = ['q2', 'q3_pytorch', 'q3_tensorflow']
+    dirs = [f"model_cache/{dir}" for dir in dirs]
+    losses = [load_losses_from_cache(dir) for dir in dirs]
 
     plot_losses(
-        q2_losses,
-        q3_losses,
+        losses,
+        labels=['Numpy', 'Pytorch', 'Tensorflow'],
         skip_epochs=100,
         plot_dir='plots',
         ylim=[0, 20])
