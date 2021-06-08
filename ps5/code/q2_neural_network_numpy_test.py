@@ -19,11 +19,18 @@ def function(p, x, y, n_inputs, n_hidden):
     output_weights = p[n_hidden_weights:]
 
     hidden_layer_weights, output_layer_weights = reshape_weights(
-        hidden_weights, output_weights, n_inputs, n_hidden)
+        hidden_weights=hidden_weights,
+        output_weights=output_weights,
+        n_inputs=n_inputs,
+        n_hidden=n_hidden
+    )
 
     y_pred, _ = calculate_model_output(
-        n_observations, hidden_layer_inputs,
-        hidden_layer_weights, output_layer_weights)
+        n_observations=n_observations,
+        inputs_with_bias=hidden_layer_inputs,
+        hidden_layer_weights=hidden_layer_weights,
+        output_layer_weights=output_layer_weights
+    )
 
     return loss_function(y, y_pred)
 
@@ -36,11 +43,18 @@ def gradient(p, x, y, n_inputs, n_hidden):
     output_weights = p[n_hidden_weights:]
 
     hidden_layer_weights, output_layer_weights = reshape_weights(
-        hidden_weights, output_weights, n_inputs, n_hidden)
+        hidden_weights=hidden_weights,
+        output_weights=output_weights,
+        n_inputs=n_inputs,
+        n_hidden=n_hidden
+    )
 
     y_pred, hidden_layer_outputs = calculate_model_output(
-            n_observations, hidden_layer_inputs,
-            hidden_layer_weights, output_layer_weights)
+        n_observations=n_observations,
+        inputs_with_bias=hidden_layer_inputs,
+        hidden_layer_weights=hidden_layer_weights,
+        output_layer_weights=output_layer_weights
+    )
 
     gradients = np.empty(len(p))
 
@@ -51,7 +65,8 @@ def gradient(p, x, y, n_inputs, n_hidden):
         y_pred=y_pred,
         hidden_layer_outputs=hidden_layer_outputs,
         output_layer_weights=output_layer_weights,
-        gradients=gradients)
+        gradients=gradients
+    )
 
     return gradients
 
