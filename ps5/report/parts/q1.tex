@@ -92,10 +92,10 @@ The input and output of the output node are the same, since I chose not to use a
 
 The loss function is
 \begin{align}
-  E = 0.5 (y - a_{o1})^2,
+  E = (y - a_{o1})^2,
   \label{eq_q1_loss_function}
 \end{align}
-where $y$ is the observed binary value (0 or 1).
+where $y$ is the observed binary value (0 or 1). Note that I'm not using factor $0.5$ because it's not present in the default ``mean square error'' function from Pytorch or Tensorflow, and I'm trying to achieve the results close to what I get from those libraries.
 
 
 \subsection{Derivatives of the loss function}
@@ -106,10 +106,10 @@ Next, I calculate the derivatives of the loss function with respect to all the w
 \end{align*}
 Next, I substitute $E$ and $a_o$ from Equations \ref{eq_q1_output_value} and \ref{eq_q1_loss_function} and calculate the derivatives for all the hidden layer weights:
 \begin{align*}
-  \frac{\partial E}{\partial w_{10}} &= a_{o1} - y \\
-  \frac{\partial E}{\partial w_{11}} &= (a_{o1} - y) b_{h1} \\
-  \frac{\partial E}{\partial w_{12}} &= (a_{o1} - y) b_{h2} \\
-  \frac{\partial E}{\partial w_{13}} &= (a_{o1} - y) b_{h3}.
+  \frac{\partial E}{\partial w_{10}} &= 2 (a_{o1} - y) \\
+  \frac{\partial E}{\partial w_{11}} &= 2 (a_{o1} - y) b_{h1} \\
+  \frac{\partial E}{\partial w_{12}} &= 2 (a_{o1} - y) b_{h2} \\
+  \frac{\partial E}{\partial w_{13}} &= 2 (a_{o1} - y) b_{h3}.
 \end{align*}
 For a weight coming form the input layer, the derivative is calculated with equation
 \begin{align*}
@@ -117,15 +117,15 @@ For a weight coming form the input layer, the derivative is calculated with equa
 \end{align*}
 Here I use \autoref{eq_q1_hidden_neurons_outputs} for $b_h$ and \autoref{eq_q1_hidden_neurons_inputs} for $a_h$ and calculate the derivatives for all the input weights:
 \begin{align*}
-  \frac{\partial E}{\partial w_{1}} &= (a_{o1} - y) w_{11} b_{h1} (1 - b_{h1}) \\
-  \frac{\partial E}{\partial w_{2}} &= (a_{o1} - y) w_{12} b_{h2} (1 - b_{h2}) \\
-  \frac{\partial E}{\partial w_{3}} &= (a_{o1} - y) w_{13} b_{h3} (1 - b_{h3}) \\
-  \frac{\partial E}{\partial w_{4}} &= (a_{o1} - y) w_{11} b_{h1} (1 - b_{h1}) x_1 \\
-  \frac{\partial E}{\partial w_{5}} &= (a_{o1} - y) w_{12} b_{h2} (1 - b_{h2}) x_1 \\
-  \frac{\partial E}{\partial w_{6}} &= (a_{o1} - y) w_{13} b_{h3} (1 - b_{h3}) x_1 \\
-  \frac{\partial E}{\partial w_{7}} &= (a_{o1} - y) w_{11} b_{h1} (1 - b_{h1}) x_2 \\
-  \frac{\partial E}{\partial w_{8}} &= (a_{o1} - y) w_{12} b_{h2} (1 - b_{h2}) x_2 \\
-  \frac{\partial E}{\partial w_{9}} &= (a_{o1} - y) w_{13} b_{h3} (1 - b_{h3}) x_2.
+  \frac{\partial E}{\partial w_{1}} &= 2 (a_{o1} - y) w_{11} b_{h1} (1 - b_{h1}) \\
+  \frac{\partial E}{\partial w_{2}} &= 2 (a_{o1} - y) w_{12} b_{h2} (1 - b_{h2}) \\
+  \frac{\partial E}{\partial w_{3}} &= 2 (a_{o1} - y) w_{13} b_{h3} (1 - b_{h3}) \\
+  \frac{\partial E}{\partial w_{4}} &= 2 (a_{o1} - y) w_{11} b_{h1} (1 - b_{h1}) x_1 \\
+  \frac{\partial E}{\partial w_{5}} &= 2 (a_{o1} - y) w_{12} b_{h2} (1 - b_{h2}) x_1 \\
+  \frac{\partial E}{\partial w_{6}} &= 2 (a_{o1} - y) w_{13} b_{h3} (1 - b_{h3}) x_1 \\
+  \frac{\partial E}{\partial w_{7}} &= 2 (a_{o1} - y) w_{11} b_{h1} (1 - b_{h1}) x_2 \\
+  \frac{\partial E}{\partial w_{8}} &= 2 (a_{o1} - y) w_{12} b_{h2} (1 - b_{h2}) x_2 \\
+  \frac{\partial E}{\partial w_{9}} &= 2 (a_{o1} - y) w_{13} b_{h3} (1 - b_{h3}) x_2.
 \end{align*}
 
 \subsection{Updating the weights}
