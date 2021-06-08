@@ -104,18 +104,18 @@ def train_model(
             losses[n_out] = loss.item()
             n_out += 1
 
-            # plot_predictions(
-            #     X, df,
-            #     mesh_size=predictions_plot_mesh_size,
-            #     epoch=epoch,
-            #     image_format='png',
-            #     plot_dir=plot_frames_dir,
-            #     run_model_func=calculate_model_output,
-            #     run_model_args={
-            #         "model": model,
-            #     },
-            #     show_epoch=True
-            # )
+            plot_predictions(
+                X, df,
+                mesh_size=predictions_plot_mesh_size,
+                epoch=epoch,
+                image_format='png',
+                plot_dir=plot_frames_dir,
+                run_model_func=calculate_model_output,
+                run_model_args={
+                    "model": model,
+                },
+                show_epoch=True
+            )
 
     return losses
 
@@ -269,12 +269,12 @@ def entry_point():
         show_epoch=False
     )
 
-    # make_movie_from_images(
-    #     plot_dir=plot_frames_dir,
-    #     movie_dir=plot_dir,
-    #     movie_name='predictions.mp4',
-    #     frame_rate=30
-    # )
+    make_movie_from_images(
+        plot_dir=plot_frames_dir,
+        movie_dir=plot_dir,
+        movie_name='predictions.mp4',
+        frame_rate=30
+    )
 
 
 if __name__ == "__main__":
