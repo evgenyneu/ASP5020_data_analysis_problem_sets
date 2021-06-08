@@ -158,7 +158,7 @@ def calculate_gradients(x, y, y_pred, n_hidden, hidden_layer_outputs,
     See q2_variables.md.
     """
 
-    s = (y_pred - y)
+    s = 2 * (y_pred - y)
     n_inputs = x.shape[1]
     n_input_weights = (n_inputs + 1) * n_hidden
 
