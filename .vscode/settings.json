@@ -6,5 +6,5 @@
     "editor.tabSize": 4
 },
 "python.linting.flake8Enabled": true,
-"python.pythonPath": "/Users/evgenii/opt/miniconda3/envs/uni_2021_data_analysis_problem_sets/bin/python",
+"python.pythonPath": "/Users/evgenii/.asdf/shims/python",
 }

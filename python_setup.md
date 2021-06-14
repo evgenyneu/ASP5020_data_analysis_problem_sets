@@ -1,51 +1,55 @@
 # Python code set up
 
-These are instructions for installing Python and its libraries that are needed for running the python scripts.
-
-## Install Miniconda
-
-Install [Miniconda](https://docs.conda.io/en/latest/miniconda.html). It is used for creating isolated Python environments that use specific version of Python and the libraries for this project (listed in [requirements.txt](requirements.txt)). This also avoids polluting system-wide python installation and interfering with other Python projects.
+Here is how to install specific versions of Python and its libraries for this project.
 
 
-## Create Conda environment
+## Install Python
 
-Create a Conda environment with Python 3.8:
+1. [Install asdf](https://asdf-vm.com/#/core-manage-asdf).
+
+2. Add python plugin to asdf:
 
 ```
-conda create --name uni_2021_data_analysis_problem_sets python=3.8
+asdf plugin add python
 ```
 
-Answer YES to when asked "The following NEW packages will be INSTALLED".
-
-
-## Activate Conda environment
+3. Install Python version specified in [.tool-versions](.tool-versions).
 
 ```
-conda activate uni_2021_data_analysis_problem_sets
+asdf install
 ```
 
-## Install Python libraries
 
-Follow the steps from [README](README.md) to download the project and make sure you are in the working directory:
+## Create Python environment
 
 ```
-cd uni_2021_data_analysis_problem_sets
+python -m venv .venv
 ```
 
-Install Python libraries listed in [requirements.txt](requirements.txt) file:
+This is put Python and its libraries in local `.venv` directory.
+
+
+## Activate Python environent
+
+```
+source .venv/bin/activate
+```
+
+Note: better yet, [setup auto-activation](https://stackoverflow.com/a/50830617/297131).
+
+
+## Install libraries
 
 ```
 pip install -r requirements.txt
 ```
 
-It will install the exact versions of Python libraries that were used by Python programs in this project. Now you are ready to run Python code.
+## Deactivate Python environment
 
-
-## Clean up
-
-To remove the `uni_2021_data_analysis_problem_sets` conda environment completely and free up disk space:
+When finished working in this directory.
 
 ```
-conda deactivate
-conda env remove -n uni_2021_data_analysis_problem_sets
+deactivate
 ```
+
+
