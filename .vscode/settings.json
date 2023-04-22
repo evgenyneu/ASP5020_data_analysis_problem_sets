@@ -5,6 +5,4 @@
   "[python]": {
     "editor.tabSize": 4
 },
-"python.linting.flake8Enabled": true,
-"python.pythonPath": "/Users/evgenii/.asdf/shims/python",
 }
